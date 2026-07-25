@@ -15,7 +15,7 @@
         <p id="alert_text"></p>
     </div>
 
-    <form method="POST" action="{{ url_for('home') }}" enctype="multipart/form-data" onsubmit="return validateFormBeforeSubmit()" class="space-y-6">
+    <form method="POST" action="{{ url_for('compose') }}" enctype="multipart/form-data" onsubmit="return validateFormBeforeSubmit()" class="space-y-6">
         <input type="hidden" name="scheduled_at" id="utc_scheduled_at">
 
         <!-- CONTENT TEXTAREA -->

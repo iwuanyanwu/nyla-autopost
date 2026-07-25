@@ -139,3 +139,19 @@ if __name__ == '__main__':
     scheduler.add_job(id='scheduled_publisher', func=check_and_publish_scheduled_posts, trigger='interval', seconds=30)
     scheduler.start()
     app.run(host='0.0.0.0', port=5000, debug=True, use_reloader=False)
+
+@app.route('/home')
+def home():
+    return redirect('/dashboard', code=303)
+
+@app.route('/')
+def home():
+    return render_template('landing.html')
+
+@app.route('/register')
+def register():
+    return redirect('/login', code=303)
+
+@app.route('/edit_post/<int:post_id>')
+def edit_post(post_id):
+    return redirect('/dashboard', code=303)

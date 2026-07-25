@@ -7,35 +7,45 @@
         <p class="text-gray-400 text-xs mt-1">Compose content with multi-platform publishing.</p>
     </div>
 
-    <form action="/compose" method="POST" enctype="multipart/form-data" class="space-y-6">
+    <form action="/compose" method="POST" enctype="multipart/form-data" id="broadcast-form" class="space-y-6">
         <!-- CONTENT TEXTAREA -->
         <div>
             <label class="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-2">Post Message</label>
-            <textarea name="content" rows="4" class="w-full px-4 py-3 rounded-2xl bg-gray-950 border border-gray-800 text-white focus:border-blue-500 focus:outline-none placeholder-gray-600 text-sm leading-relaxed" placeholder="Write something engaging..." required></textarea>
+            <textarea name="content" id="post-content" rows="4" class="w-full px-4 py-3 rounded-2xl bg-gray-950 border border-gray-800 text-white placeholder-gray-600 text-sm leading-relaxed" placeholder="Write something engaging..." required></textarea>
+            <div id="char-counter" class="text-right text-xs text-gray-500 mt-1">0 / 280 characters</div>
         </div>
 
-        <!-- TARGET PLATFORMS -->
+        <!-- TARGET NETWORKS -->
         <div>
             <label class="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-3">Target Networks</label>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <label class="flex items-center justify-center gap-2 p-3 bg-gray-950 border border-gray-800 rounded-2xl cursor-pointer hover:border-blue-500 transition">
-                    <input type="checkbox" name="platforms" value="facebook" checked class="rounded text-blue-600 focus:ring-0">
+                    <input type="checkbox" name="platforms" value="facebook" class="platform-checkbox rounded text-blue-600 focus:ring-0">
                     <span class="text-xs font-bold text-gray-300">Facebook</span>
                 </label>
                 <label class="flex items-center justify-center gap-2 p-3 bg-gray-950 border border-gray-800 rounded-2xl cursor-pointer hover:border-pink-500 transition">
-                    <input type="checkbox" name="platforms" value="instagram" class="rounded text-pink-500 focus:ring-0">
+                    <input type="checkbox" name="platforms" value="instagram" class="platform-checkbox rounded text-pink-500 focus:ring-0">
                     <span class="text-xs font-bold text-gray-300">Instagram</span>
                 </label>
                 <label class="flex items-center justify-center gap-2 p-3 bg-gray-950 border border-gray-800 rounded-2xl cursor-pointer hover:border-blue-400 transition">
-                    <input type="checkbox" name="platforms" value="linkedin" class="rounded text-blue-400 focus:ring-0">
+                    <input type="checkbox" name="platforms" value="linkedin" class="platform-checkbox rounded text-blue-600 focus:ring-0">
                     <span class="text-xs font-bold text-gray-300">LinkedIn</span>
                 </label>
                 <label class="flex items-center justify-center gap-2 p-3 bg-gray-950 border border-gray-800 rounded-2xl cursor-pointer hover:border-gray-400 transition">
-                    <input type="checkbox" name="platforms" value="x" checked class="rounded text-white focus:ring-0">
+                    <input type="checkbox" name="platforms" value="x" class="platform-checkbox rounded text-white focus:ring-0">
                     <span class="text-xs font-bold text-gray-300">X</span>
                 </label>
             </div>
         </div>
+
+        <!-- MEDIA UPLOAD -->
+        <div class="p-4 bg-gray-950 border border-gray-800 rounded-2xl">
+            <label class="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-2">Upload Media <span id="media-requirement-label" class="text-gray-500 font-normal">(Required for Instagram: at least 1 image)</span></label>
+            <input type="file" name="media" id="media-input" multiple class="w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-gray-800 file:text-white hover:file:bg-gray-700">
+        </div>
+
+        <!-- VALIDATION WARNING BANNER -->
+        <div id="validation-warning" class="hidden p-3 bg-pink-950/40 border border-pink-900/50 rounded-xl text-pink-400 text-xs text-center font-medium"></div>
 
         <!-- PUBLISH OPTIONS -->
         <div class="border-t border-gray-800 pt-6">
@@ -56,21 +66,85 @@
         <div id="schedule_picker" class="hidden space-y-3">
             <div>
                 <label class="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-1">Date & Time</label>
-                <input type="datetime-local" name="scheduled_at_local" class="w-full px-4 py-3 rounded-2xl bg-gray-950 border border-gray-800 text-white focus:border-blue-500 focus:outline-none text-sm">
+                <input type="datetime-local" name="scheduled_at_local" class="w-full px-4 py-3 rounded-2xl bg-gray-950 border border-gray-800 text-white focus:border-blue-500 outline-none text-sm">
             </div>
             <!-- Auto-detected Timezone Offset -->
             <input type="hidden" name="tz_offset" id="tz_offset" value="0">
         </div>
 
         <!-- SUBMIT BUTTON -->
-        <button type="submit" class="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-pink-600 text-white font-extrabold py-4 rounded-2xl transition shadow-xl shadow-blue-600/20 text-sm uppercase tracking-wider">
+        <button type="submit" id="broadcast-btn" class="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-pink-600 text-white font-extrabold py-4 rounded-2xl transition shadow-xl shadow-blue-600/20 text-sm uppercase tracking-wider opacity-50 cursor-not-allowed" disabled>
             Broadcast Content
         </button>
     </form>
 </div>
 
 <script>
-// Automatically pass the phone's timezone offset in minutes to Flask
 document.getElementById('tz_offset').value = new Date().getTimezoneOffset();
+
+const textarea = document.getElementById('post-content');
+const counter = document.getElementById('char-counter');
+const checkboxes = document.querySelectorAll('.platform-checkbox');
+const mediaInput = document.getElementById('media-input');
+const broadcastBtn = document.getElementById('broadcast-btn');
+const warningBanner = document.getElementById('validation-warning');
+
+function validateForm() {
+    const text = textarea.value;
+    const textLen = text.length;
+    
+    counter.textContent = `${textLen} / 280 characters`;
+    if (textLen > 280) {
+        counter.classList.add('text-pink-500');
+        counter.classList.remove('text-gray-500');
+    } else {
+        counter.classList.remove('text-pink-500');
+        counter.classList.add('text-gray-500');
+    }
+
+    const selectedPlatforms = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+    const mediaFiles = mediaInput.files;
+
+    let errorMessage = "";
+    let isValid = true;
+
+    if (selectedPlatforms.length === 0) {
+        isValid = false;
+        errorMessage = "Please select at least one target network account.";
+    } else if (textLen === 0) {
+        isValid = false;
+        errorMessage = "Post message cannot be empty.";
+    } else {
+        if (selectedPlatforms.includes('x') && textLen > 280) {
+            isValid = false;
+            errorMessage = "X (Twitter) limit exceeded: Post must be 280 characters or less.";
+        }
+        if (selectedPlatforms.includes('instagram') && mediaFiles.length < 1) {
+            isValid = false;
+            errorMessage = "Instagram requires at least one uploaded picture/media file.";
+        }
+    }
+
+    if (!isValid && (selectedPlatforms.length > 0 || textLen > 0)) {
+        warningBanner.textContent = errorMessage;
+        warningBanner.classList.remove('hidden');
+    } else {
+        warningBanner.classList.add('hidden');
+    }
+
+    if (isValid && selectedPlatforms.length > 0) {
+        broadcastBtn.disabled = false;
+        broadcastBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    } else {
+        broadcastBtn.disabled = true;
+        broadcastBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+}
+
+textarea.addEventListener('input', validateForm);
+mediaInput.addEventListener('change', validateForm);
+checkboxes.forEach(cb => cb.addEventListener('change', validateForm));
+
+validateForm();
 </script>
 {% endblock %}
