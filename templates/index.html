@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+{% block title %}Create & Broadcast - Nyla AutoPost{% endblock %}
+{% block content %}
+<div class="bg-gray-900/80 p-8 rounded-3xl border border-gray-800 shadow-2xl max-w-2xl mx-auto space-y-6">
+    <div>
+        <h1 class="text-2xl font-black text-white">Create & Broadcast</h1>
+        <p class="text-gray-400 text-xs mt-1">Compose content with live multi-platform limits validation.</p>
+    </div>
+
+    <!-- ERROR WARNING BANNER -->
+    <div id="validation_alert" class="hidden bg-red-500/10 border border-red-500/30 text-red-400 p-4 rounded-2xl text-xs font-semibold space-y-1">
+        <div class="flex items-center gap-2 text-sm font-bold">
+            <i class="fa-solid fa-triangle-exclamation"></i> Platform Validation Warning
+        </div>
+        <p id="alert_text"></p>
+    </div>
+
+    <form method="POST" action="{{ url_for('home') }}" enctype="multipart/form-data" onsubmit="return validateFormBeforeSubmit()" class="space-y-6">
+        <input type="hidden" name="scheduled_at" id="utc_scheduled_at">
+
+        <!-- CONTENT TEXTAREA -->
+        <div>
+            <div class="flex justify-between items-center mb-2">
+                <label class="text-xs font-bold text-gray-300 uppercase tracking-wider">Post Message</label>
+                <span id="char_count" class="text-xs font-mono text-gray-400">0 characters</span>
+            </div>
+            <textarea name="content" id="post_text" rows="4" oninput="validateLimits()" class="w-full px-4 py-3 rounded-2xl bg-gray-950 border border-gray-800 text-white focus:border-blue-500 focus:outline-none text-sm leading-relaxed" placeholder="Write something engaging..."></textarea>
+        </div>
+
+        <!-- IMAGE ATTACHMENTS -->
+        <div>
+            <label class="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-2">Attach Images</label>
+            <div class="relative border-2 border-dashed border-gray-800 hover:border-blue-500/50 bg-gray-950/60 p-5 rounded-2xl text-center transition cursor-pointer">
+                <input type="file" name="images" id="image_input" multiple accept="image/*" onchange="handleImageSelection(this)" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer">
+                <div class="space-y-2 pointer-events-none">
+                    <i class="fa-solid fa-cloud-arrow-up text-2xl text-blue-400"></i>
+                    <p class="text-xs font-semibold text-gray-300">Click or drag images here to upload</p>
+                    <p class="text-[10px] text-gray-500">Supports PNG, JPG, WEBP</p>
+                </div>
+            </div>
+            <!-- PREVIEW GRID -->
+            <div id="image_preview_grid" class="grid grid-cols-4 gap-3 mt-3"></div>
+        </div>
+
+        <!-- TARGET NETWORKS -->
+        <div>
+            <div class="flex justify-between items-center mb-3">
+                <label class="text-xs font-bold text-gray-300 uppercase tracking-wider">Target Networks</label>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <label class="flex items-center justify-center gap-2 p-3 bg-gray-950 border border-gray-800 rounded-2xl cursor-pointer hover:border-blue-500 transition group">
+                    <input type="checkbox" name="platforms" value="facebook" onchange="validateLimits()" class="platform-checkbox rounded text-blue-600 focus:ring-0">
+                    <i class="fa-brands fa-facebook text-blue-500 text-lg"></i>
+                    <span class="text-xs font-bold text-gray-300 group-hover:text-white">Facebook</span>
+                </label>
+                <label class="flex items-center justify-center gap-2 p-3 bg-gray-950 border border-gray-800 rounded-2xl cursor-pointer hover:border-pink-500 transition group">
+                    <input type="checkbox" name="platforms" value="instagram" onchange="validateLimits()" class="platform-checkbox rounded text-pink-600 focus:ring-0">
+                    <i class="fa-brands fa-instagram text-pink-500 text-lg"></i>
+                    <span class="text-xs font-bold text-gray-300 group-hover:text-white">Instagram</span>
+                </label>
+                <label class="flex items-center justify-center gap-2 p-3 bg-gray-950 border border-gray-800 rounded-2xl cursor-pointer hover:border-blue-400 transition group">
+                    <input type="checkbox" name="platforms" value="linkedin" onchange="validateLimits()" class="platform-checkbox rounded text-blue-400 focus:ring-0">
+                    <i class="fa-brands fa-linkedin text-blue-400 text-lg"></i>
+                    <span class="text-xs font-bold text-gray-300 group-hover:text-white">LinkedIn</span>
+                </label>
+                <label class="flex items-center justify-center gap-2 p-3 bg-gray-950 border border-gray-800 rounded-2xl cursor-pointer hover:border-gray-400 transition group">
+                    <input type="checkbox" name="platforms" value="x" id="x_checkbox" onchange="toggleXPremiumOption()" class="platform-checkbox rounded text-white focus:ring-0">
+                    <i class="fa-brands fa-x-twitter text-white text-lg"></i>
+                    <span class="text-xs font-bold text-gray-300 group-hover:text-white">X</span>
+                </label>
+            </div>
+
+            <!-- X PREMIUM OPTION TOGGLE -->
+            <div id="x_premium_container" class="mt-3 hidden items-center gap-2 px-3 py-2 bg-gray-950/50 border border-gray-800/80 rounded-xl text-xs text-gray-400">
+                <input type="checkbox" id="is_x_premium" onchange="validateLimits()" class="rounded text-blue-500 focus:ring-0">
+                <label for="is_x_premium" class="cursor-pointer select-none">
+                    <span class="font-bold text-white">X Premium / Verified</span> (Extends limit from 280 to 25,000 characters)
+                </label>
+            </div>
+        </div>
+
+        <!-- PUBLISH MODE (NOW / LATER) -->
+        <div>
+            <label class="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-2">Publish Schedule</label>
+            <div class="grid grid-cols-2 gap-3 mb-3">
+                <button type="button" id="btn_now" onclick="setPublishMode('now')" class="p-3 bg-blue-600 border border-blue-500 text-white rounded-2xl text-xs font-bold transition">
+                    Publish Now
+                </button>
+                <button type="button" id="btn_later" onclick="setPublishMode('later')" class="p-3 bg-gray-950 border border-gray-800 text-gray-400 rounded-2xl text-xs font-bold transition hover:text-white">
+                    Schedule for Later
+                </button>
+            </div>
+            <div id="datetime_picker_container" class="hidden">
+                <input type="datetime-local" id="local_datetime_input" class="w-full px-4 py-3 rounded-2xl bg-gray-950 border border-gray-800 text-white focus:border-blue-500 focus:outline-none text-sm">
+            </div>
+        </div>
+
+        <!-- SUBMIT BUTTON -->
+        <button type="submit" id="submit_btn" class="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-pink-600 hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed text-white font-extrabold py-4 rounded-2xl transition shadow-xl shadow-blue-600/20 text-sm uppercase tracking-wider">
+            Publish Post
+        </button>
+    </form>
+</div>
+
+<script>
+    let selectedFilesContainer = new DataTransfer();
+    let publishMode = 'now';
+
+    function setPublishMode(mode) {
+        publishMode = mode;
+        const btnNow = document.getElementById('btn_now');
+        const btnLater = document.getElementById('btn_later');
+        const picker = document.getElementById('datetime_picker_container');
+
+        if (mode === 'now') {
+            btnNow.className = 'p-3 bg-blue-600 border border-blue-500 text-white rounded-2xl text-xs font-bold transition';
+            btnLater.className = 'p-3 bg-gray-950 border border-gray-800 text-gray-400 rounded-2xl text-xs font-bold transition hover:text-white';
+            picker.classList.add('hidden');
+        } else {
+            btnLater.className = 'p-3 bg-blue-600 border border-blue-500 text-white rounded-2xl text-xs font-bold transition';
+            btnNow.className = 'p-3 bg-gray-950 border border-gray-800 text-gray-400 rounded-2xl text-xs font-bold transition hover:text-white';
+            picker.classList.remove('hidden');
+            
+            if (!document.getElementById('local_datetime_input').value) {
+                const now = new Date();
+                now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                document.getElementById('local_datetime_input').value = now.toISOString().slice(0, 16);
+            }
+        }
+    }
+
+    function toggleXPremiumOption() {
+        const xChecked = document.getElementById('x_checkbox').checked;
+        const premiumBox = document.getElementById('x_premium_container');
+        if (xChecked) {
+            premiumBox.classList.remove('hidden');
+            premiumBox.classList.add('flex');
+        } else {
+            premiumBox.classList.add('hidden');
+            premiumBox.classList.remove('flex');
+            document.getElementById('is_x_premium').checked = false;
+        }
+        validateLimits();
+    }
+
+    function handleImageSelection(input) {
+        if (input.files.length > 0) {
+            Array.from(input.files).forEach(file => {
+                selectedFilesContainer.items.add(file);
+            });
+            input.files = selectedFilesContainer.files;
+            renderPreviews();
+        }
+    }
+
+    function removeUploadedImage(index) {
+        const dt = new DataTransfer();
+        const files = selectedFilesContainer.files;
+        for (let i = 0; i < files.length; i++) {
+            if (i !== index) dt.items.add(files[i]);
+        }
+        selectedFilesContainer = dt;
+        document.getElementById('image_input').files = selectedFilesContainer.files;
+        renderPreviews();
+    }
+
+    function renderPreviews() {
+        const grid = document.getElementById('image_preview_grid');
+        grid.innerHTML = '';
+
+        Array.from(selectedFilesContainer.files).forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imgContainer = document.createElement('div');
+                imgContainer.className = 'relative h-20 rounded-xl overflow-hidden border border-gray-800 bg-gray-950 group';
+                imgContainer.innerHTML = `
+                    <img src="${e.target.result}" class="w-full h-full object-cover">
+                    <button type="button" onclick="removeUploadedImage(${index})" class="absolute top-1 right-1 bg-red-600 hover:bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold shadow-md transition">
+                        ✕
+                    </button>
+                `;
+                grid.appendChild(imgContainer);
+            };
+            reader.readAsDataURL(file);
+        });
+
+        validateLimits();
+    }
+
+    function validateLimits() {
+        const text = document.getElementById('post_text').value;
+        const charLen = text.length;
+        document.getElementById('char_count').innerText = charLen + ' characters';
+
+        const checkedBoxes = document.querySelectorAll('.platform-checkbox:checked');
+        const selectedPlatforms = Array.from(checkedBoxes).map(cb => cb.value);
+        const isXPremium = document.getElementById('is_x_premium').checked;
+        
+        const totalImageCount = selectedFilesContainer.files.length;
+        const alertBox = document.getElementById('validation_alert');
+        const alertText = document.getElementById('alert_text');
+        const submitBtn = document.getElementById('submit_btn');
+
+        let errors = [];
+
+        if (selectedPlatforms.length === 0) {
+            errors.push("You must select at least 1 social network platform.");
+        }
+
+        // X (Twitter) Rules
+        if (selectedPlatforms.includes('x')) {
+            const xMaxChars = isXPremium ? 25000 : 280;
+            if (charLen > xMaxChars) {
+                errors.push(`X character limit exceeded: ${charLen}/${xMaxChars} characters.`);
+            }
+            if (totalImageCount > 4) {
+                errors.push(`X supports a maximum of 4 photos per post (selected: ${totalImageCount}).`);
+            }
+        }
+
+        // Instagram Rules
+        if (selectedPlatforms.includes('instagram')) {
+            if (charLen > 2200) {
+                errors.push(`Instagram character limit exceeded: ${charLen}/2200 characters.`);
+            }
+            if (totalImageCount === 0) {
+                errors.push("Instagram requires at least 1 image attachment.");
+            } else if (totalImageCount > 10) {
+                errors.push(`Instagram carousel limit exceeded: ${totalImageCount}/10 images selected.`);
+            }
+        }
+
+        // LinkedIn Rules
+        if (selectedPlatforms.includes('linkedin')) {
+            if (charLen > 3000) {
+                errors.push(`LinkedIn character limit exceeded: ${charLen}/3000 characters.`);
+            }
+            if (totalImageCount > 9) {
+                errors.push(`LinkedIn image limit exceeded: ${totalImageCount}/9 images selected.`);
+            }
+        }
+
+        // Facebook Rules
+        if (selectedPlatforms.includes('facebook')) {
+            if (charLen > 63206) {
+                errors.push(`Facebook character limit exceeded: ${charLen}/63206 characters.`);
+            }
+            if (totalImageCount > 10) {
+                errors.push(`Facebook image limit exceeded: ${totalImageCount}/10 images selected.`);
+            }
+        }
+
+        if (errors.length > 0) {
+            alertText.innerHTML = errors.join('<br>');
+            alertBox.classList.remove('hidden');
+            submitBtn.disabled = true;
+            return false;
+        } else {
+            alertBox.classList.add('hidden');
+            submitBtn.disabled = false;
+            return true;
+        }
+    }
+
+    function validateFormBeforeSubmit() {
+        const isValid = validateLimits();
+        if (!isValid) return false;
+
+        if (publishMode === 'later') {
+            const localInput = document.getElementById('local_datetime_input');
+            if (localInput.value) {
+                const localDate = new Date(localInput.value);
+                document.getElementById('utc_scheduled_at').value = localDate.toISOString().slice(0, 19);
+            }
+        } else {
+            document.getElementById('utc_scheduled_at').value = '';
+        }
+        return true;
+    }
+</script>
+{% endblock %}

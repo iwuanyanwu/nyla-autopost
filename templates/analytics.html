@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}Analytics - Nyla AutoPost{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <h1 class="text-3xl font-extrabold text-white">Performance Analytics</h1>
+
+    <!-- STATS OVERVIEW -->
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div class="bg-gray-900/80 p-4 rounded-3xl border border-gray-800">
+            <p class="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">Total Views</p>
+            <p class="text-2xl font-black text-blue-400 mt-1">{{ total_impressions }}</p>
+        </div>
+        <div class="bg-gray-900/80 p-4 rounded-3xl border border-gray-800">
+            <p class="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">Facebook</p>
+            <p class="text-2xl font-black text-blue-500 mt-1">{{ fb_count }}</p>
+        </div>
+        <div class="bg-gray-900/80 p-4 rounded-3xl border border-gray-800">
+            <p class="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">Instagram</p>
+            <p class="text-2xl font-black text-pink-500 mt-1">{{ ig_count }}</p>
+        </div>
+        <div class="bg-gray-900/80 p-4 rounded-3xl border border-gray-800">
+            <p class="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">LinkedIn</p>
+            <p class="text-2xl font-black text-blue-300 mt-1">{{ linkedin_count }}</p>
+        </div>
+        <div class="bg-gray-900/80 p-4 rounded-3xl border border-gray-800 col-span-2 md:col-span-1">
+            <p class="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">X (Twitter)</p>
+            <p class="text-2xl font-black text-gray-200 mt-1">{{ x_count }}</p>
+        </div>
+    </div>
+
+    <!-- CHARTS -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-gray-900/80 p-6 rounded-3xl border border-gray-800 shadow-xl">
+            <h3 class="text-sm font-bold text-white mb-4">7-Day Engagement Trend</h3>
+            <canvas id="reachChart" class="w-full max-h-56"></canvas>
+        </div>
+        <div class="bg-gray-900/80 p-6 rounded-3xl border border-gray-800 shadow-xl">
+            <h3 class="text-sm font-bold text-white mb-4">Platform Distribution</h3>
+            <canvas id="platformChart" class="w-full max-h-56"></canvas>
+        </div>
+    </div>
+
+    <!-- INTERACTIVE POST FILTER TABLE -->
+    <div class="bg-gray-900/80 p-6 rounded-3xl border border-gray-800 shadow-xl space-y-4">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+            <h2 class="text-lg font-bold text-white">Content Logs</h2>
+            
+            <!-- FILTER BUTTONS -->
+            <div class="flex gap-1.5 bg-gray-950 p-1 rounded-2xl border border-gray-800 text-xs">
+                <button onclick="filterPosts('all')" class="filter-btn active px-3 py-1.5 rounded-xl text-gray-300 font-bold hover:text-white">All</button>
+                <button onclick="filterPosts('published')" class="filter-btn px-3 py-1.5 rounded-xl text-gray-400 hover:text-white">Published</button>
+                <button onclick="filterPosts('scheduled')" class="filter-btn px-3 py-1.5 rounded-xl text-gray-400 hover:text-white">Scheduled</button>
+            </div>
+        </div>
+
+        {% if posts %}
+        <div class="space-y-3" id="post_list">
+            {% for post in posts %}
+            <div class="post-item bg-gray-950/80 p-4 rounded-2xl border border-gray-800/80 flex flex-col md:flex-row justify-between items-start md:items-center gap-3" data-status="{{ post.status }}">
+                <div class="space-y-1">
+                    <p class="text-white font-medium text-sm leading-snug">{{ post.content }}</p>
+                    <div class="flex items-center gap-3 text-xs text-gray-400">
+                        <span><i class="fa-regular fa-clock"></i> {{ post.scheduled_at.strftime('%b %d, %Y - %H:%M') }}</span>
+                        <span class="capitalize text-blue-400 font-semibold"><i class="fa-solid fa-share-nodes"></i> {{ post.platforms }}</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    {% if post.status == 'published' %}
+                        <span class="bg-emerald-500/10 text-emerald-400 text-xs px-2.5 py-1 rounded-xl font-bold border border-emerald-500/20">Published</span>
+                        <span class="bg-blue-500/10 text-blue-300 text-xs px-3 py-1 rounded-xl font-black border border-blue-500/20">{{ post.impressions }} views</span>
+                    {% else %}
+                        <span class="bg-amber-500/10 text-amber-400 text-xs px-2.5 py-1 rounded-xl font-bold border border-amber-500/20">Scheduled</span>
+                        <span class="bg-gray-800 text-gray-400 text-xs px-3 py-1 rounded-xl font-bold">Pending</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-gray-500 text-sm">No activity recorded yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    function filterPosts(status) {
+        const items = document.querySelectorAll('.post-item');
+        items.forEach(item => {
+            if (status === 'all' || item.dataset.status === status) {
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+
+    // Line Chart
+    const ctxReach = document.getElementById('reachChart').getContext('2d');
+    new Chart(ctxReach, {
+        type: 'line',
+        data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            datasets: [{
+                data: [180, 320, 450, 600, 400, 520, {{ total_impressions }}],
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59, 130, 246, 0.15)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { color: '#1f2937' }, ticks: { color: '#6b7280' } },
+                y: { grid: { color: '#1f2937' }, ticks: { color: '#6b7280' } }
+            }
+        }
+    });
+
+    // Doughnut Chart
+    const ctxPlatform = document.getElementById('platformChart').getContext('2d');
+    new Chart(ctxPlatform, {
+        type: 'doughnut',
+        data: {
+            labels: ['Facebook', 'Instagram', 'LinkedIn', 'X'],
+            datasets: [{
+                data: [{{ fb_count }}, {{ ig_count }}, {{ linkedin_count }}, {{ x_count }}],
+                backgroundColor: ['#3b82f6', '#ec4899', '#60a5fa', '#f3f4f6']
+            }]
+        },
+        options: {
+            plugins: { legend: { labels: { color: '#9ca3af' } } }
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Nyla AutoPost - Social Media Automation{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gradient-to-br from-gray-950 via-gray-900 to-slate-950 text-gray-100 min-h-screen flex flex-col font-sans antialiased">
+    
+    <!-- NAVIGATION BAR -->
+    <nav class="bg-gray-900/90 backdrop-blur-md border-b border-gray-800 sticky top-0 z-50 px-6 py-4 flex justify-between items-center shadow-xl">
+        <a href="{{ url_for('home') }}" class="flex items-center gap-3 group">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-pink-500 flex items-center justify-center text-white text-lg font-black shadow-lg shadow-blue-500/30 group-hover:scale-105 transition">
+                N
+            </div>
+            <span class="text-xl font-extrabold tracking-tight text-white group-hover:text-blue-400 transition">
+                Nyla <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-pink-400">AutoPost</span>
+            </span>
+        </a>
+
+        {% if current_user.is_authenticated %}
+        <div class="hidden md:flex items-center gap-1 bg-gray-800/80 p-1.5 rounded-2xl border border-gray-700/60 text-sm">
+            <a href="{{ url_for('dashboard') }}" class="px-4 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-gray-700/60 font-medium transition flex items-center gap-2">
+                <i class="fa-solid fa-chart-pie text-blue-400"></i> Dashboard
+            </a>
+            <a href="{{ url_for('compose') }}" class="px-4 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-gray-700/60 font-medium transition flex items-center gap-2">
+                <i class="fa-solid fa-pen-to-square text-indigo-400"></i> Compose
+            </a>
+            <a href="{{ url_for('analytics') }}" class="px-4 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-gray-700/60 font-medium transition flex items-center gap-2">
+                <i class="fa-solid fa-chart-line text-pink-400"></i> Analytics
+            </a>
+            <a href="{{ url_for('settings') }}" class="px-4 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-gray-700/60 font-medium transition flex items-center gap-2">
+                <i class="fa-solid fa-gear text-emerald-400"></i> Settings
+            </a>
+        </div>
+        <a href="{{ url_for('logout') }}" class="text-xs bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500 hover:text-white px-4 py-2 rounded-xl font-semibold transition">
+            Logout
+        </a>
+        {% else %}
+        <div class="flex items-center gap-3">
+            <a href="{{ url_for('login') }}" class="text-sm text-gray-300 hover:text-white font-medium px-3 py-2">Sign In</a>
+            <a href="{{ url_for('register') }}" class="text-sm bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold px-5 py-2.5 rounded-xl transition shadow-lg shadow-blue-600/30">
+                Get Started
+            </a>
+        </div>
+        {% endif %}
+    </nav>
+
+    <!-- MOBILE BOTTOM NAV FOR LOGGED IN USERS -->
+    {% if current_user.is_authenticated %}
+    <div class="md:hidden fixed bottom-0 left-0 right-0 bg-gray-900/95 backdrop-blur-lg border-t border-gray-800 z-50 flex justify-around py-3 px-2">
+        <a href="{{ url_for('dashboard') }}" class="flex flex-col items-center text-xs text-gray-400 hover:text-blue-400">
+            <i class="fa-solid fa-chart-pie text-lg mb-1"></i> Dashboard
+        </a>
+        <a href="{{ url_for('compose') }}" class="flex flex-col items-center text-xs text-gray-400 hover:text-blue-400">
+            <i class="fa-solid fa-pen-to-square text-lg mb-1"></i> Compose
+        </a>
+        <a href="{{ url_for('analytics') }}" class="flex flex-col items-center text-xs text-gray-400 hover:text-blue-400">
+            <i class="fa-solid fa-chart-line text-lg mb-1"></i> Analytics
+        </a>
+        <a href="{{ url_for('settings') }}" class="flex flex-col items-center text-xs text-gray-400 hover:text-blue-400">
+            <i class="fa-solid fa-gear text-lg mb-1"></i> Settings
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- MAIN CONTAINER -->
+    <main class="flex-1 container mx-auto px-4 py-6 max-w-5xl mb-16 md:mb-6">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="bg-gradient-to-r from-blue-600/90 to-indigo-600/90 text-white p-4 rounded-2xl mb-6 shadow-xl border border-blue-400/30 flex items-center gap-3">
+                        <i class="fa-solid fa-circle-check text-xl"></i>
+                        <span class="text-sm font-semibold">{{ message }}</span>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>
