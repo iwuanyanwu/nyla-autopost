@@ -59,6 +59,15 @@ def login():
         return redirect(url_for('dashboard'))
     return render_template('login.html')
 
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        # Handle registration logic or redirect straight to login/dashboard
+        user = SimpleUser(1)
+        login_user(user)
+        return redirect(url_for('dashboard'))
+    return render_template('register.html')
+
 @app.route('/logout')
 @login_required
 def logout():
