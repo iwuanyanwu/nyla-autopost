@@ -1,165 +1,143 @@
 {% extends "base.html" %}
+{% block title %}Settings - Nyla AutoPost{% endblock %}
+
 {% block content %}
-<div class="max-w-4xl mx-auto space-y-6">
+<div class="space-y-8 max-w-4xl mx-auto pb-12">
     <!-- Header -->
-    <div class="bg-gray-800/60 border border-gray-700/60 rounded-2xl p-6 shadow-lg backdrop-blur-md">
-        <h1 class="text-2xl font-bold text-white flex items-center gap-3">
-            <i class="fa-solid fa-gear text-emerald-400"></i> Settings & Configuration
-        </h1>
-        <p class="text-gray-400 text-sm mt-1">Manage your platform API credentials, notification preferences, and system configuration.</p>
+    <div class="bg-gray-900/80 p-6 md:p-8 rounded-3xl border border-gray-800 shadow-xl space-y-2">
+        <div class="flex items-center gap-3 text-blue-400">
+            <i class="fa-solid fa-gear text-2xl"></i>
+            <h1 class="text-2xl font-black text-white">Settings & Configuration</h1>
+        </div>
+        <p class="text-gray-400 text-xs md:text-sm">Manage your profile credentials and social platform API connections.</p>
     </div>
 
-    <!-- Platform Integrations Section -->
-    <div class="bg-gray-800/60 border border-gray-700/60 rounded-2xl p-6 shadow-lg backdrop-blur-md space-y-6">
-        <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+    <!-- Account & Security -->
+    <div class="bg-gray-900/80 p-6 md:p-8 rounded-3xl border border-gray-800 shadow-xl space-y-6">
+        <h2 class="text-lg font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-user-shield text-emerald-400"></i> Account & Security
+        </h2>
+        <form method="POST" action="/update-account" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-gray-400 uppercase tracking-wider">Email Address</label>
+                    <input type="email" name="email" value="{{ user_email if user_email else '' }}" placeholder="name@example.com" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blue-500">
+                </div>
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-gray-400 uppercase tracking-wider">Default Timezone</label>
+                    <select name="timezone" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blue-500">
+                        <option value="UTC">UTC (Coordinated Universal Time)</option>
+                        <option value="Africa/Lagos">West Africa Time (WAT - Lagos)</option>
+                        <option value="America/New_York">Eastern Time (ET)</option>
+                        <option value="Europe/London">Greenwich Mean Time (GMT)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-gray-400 uppercase tracking-wider">Current Password</label>
+                    <input type="password" name="current_password" placeholder="••••••••" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blue-500">
+                </div>
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-gray-400 uppercase tracking-wider">New Password</label>
+                    <input type="password" name="new_password" placeholder="Leave blank to keep current" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blue-500">
+                </div>
+            </div>
+            <div class="pt-2">
+                <button type="submit" class="bg-gray-800 hover:bg-gray-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3 rounded-xl border border-gray-700 transition">Update Account</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Social Media API Integrations -->
+    <div class="bg-gray-900/80 p-6 md:p-8 rounded-3xl border border-gray-800 shadow-xl space-y-6">
+        <h2 class="text-lg font-bold text-white flex items-center gap-2">
             <i class="fa-solid fa-share-nodes text-blue-400"></i> Social Media API Integrations
         </h2>
-        <form method="POST" class="space-y-6">
-            
+        
+        <form method="POST" action="/save-credentials" class="space-y-6">
             <!-- Instagram -->
-            <div class="bg-gray-900/40 border border-gray-700/50 p-4 rounded-xl space-y-3">
-                <h3 class="text-white font-medium flex items-center gap-2">
-                    <i class="fa-brands fa-instagram text-pink-400"></i> Instagram Graph API
-                </h3>
+            <div class="bg-gray-950 p-5 rounded-2xl border border-gray-800/80 space-y-4">
+                <div class="flex items-center gap-2 text-pink-500 font-bold text-sm">
+                    <i class="fa-brands fa-instagram text-lg"></i> Instagram Graph API
+                </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-medium text-gray-400 mb-1">Instagram Business Account ID</label>
-                        <input type="text" name="ig_account_id" placeholder="e.g. 178414... (IG User ID)" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
+                    <div class="space-y-1">
+                        <label class="text-[11px] font-bold text-gray-400 uppercase">Instagram Business Account ID</label>
+                        <input type="text" name="ig_account_id" placeholder="e.g. 178414... (IG User ID)" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-white text-xs">
                     </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-400 mb-1">Facebook Page Access Token</label>
-                        <input type="password" name="ig_access_token" placeholder="Long-lived user/page access token" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
+                    <div class="space-y-1">
+                        <label class="text-[11px] font-bold text-gray-400 uppercase">Facebook Page Access Token</label>
+                        <input type="password" name="fb_page_token" placeholder="Long-lived user/page access token" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-white text-xs">
                     </div>
                 </div>
             </div>
 
             <!-- X (Twitter) -->
-            <div class="bg-gray-900/40 border border-gray-700/50 p-4 rounded-xl space-y-3">
-                <h3 class="text-white font-medium flex items-center gap-2">
-                    <i class="fa-brands fa-x-twitter text-white"></i> X (Twitter) API v2
-                </h3>
+            <div class="bg-gray-950 p-5 rounded-2xl border border-gray-800/80 space-y-4">
+                <div class="flex items-center gap-2 text-white font-bold text-sm">
+                    <i class="fa-brands fa-x-twitter text-lg"></i> X (Twitter) API v2
+                </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-medium text-gray-400 mb-1">Consumer Key / API Key</label>
-                        <input type="text" name="x_api_key" placeholder="API Key from X Developer Portal" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
+                    <div class="space-y-1">
+                        <label class="text-[11px] font-bold text-gray-400 uppercase">Consumer Key / API Key</label>
+                        <input type="text" name="x_api_key" placeholder="API Key from X Developer Portal" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-white text-xs">
                     </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-400 mb-1">Consumer Secret / API Secret</label>
-                        <input type="password" name="x_api_secret" placeholder="API Secret Key" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
+                    <div class="space-y-1">
+                        <label class="text-[11px] font-bold text-gray-400 uppercase">Consumer Secret / API Secret</label>
+                        <input type="password" name="x_api_secret" placeholder="API Secret Key" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-white text-xs">
                     </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-400 mb-1">Access Token</label>
-                        <input type="text" name="x_access_token" placeholder="User Access Token" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
+                    <div class="space-y-1">
+                        <label class="text-[11px] font-bold text-gray-400 uppercase">Access Token</label>
+                        <input type="text" name="x_access_token" placeholder="User Access Token" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-white text-xs">
                     </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-400 mb-1">Access Token Secret</label>
-                        <input type="password" name="x_access_secret" placeholder="User Access Token Secret" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
+                    <div class="space-y-1">
+                        <label class="text-[11px] font-bold text-gray-400 uppercase">Access Token Secret</label>
+                        <input type="password" name="x_access_secret" placeholder="User Access Token Secret" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-white text-xs">
                     </div>
                 </div>
             </div>
 
             <!-- LinkedIn -->
-            <div class="bg-gray-900/40 border border-gray-700/50 p-4 rounded-xl space-y-3">
-                <h3 class="text-white font-medium flex items-center gap-2">
-                    <i class="fa-brands fa-linkedin text-blue-500"></i> LinkedIn API
-                </h3>
+            <div class="bg-gray-950 p-5 rounded-2xl border border-gray-800/80 space-y-4">
+                <div class="flex items-center gap-2 text-blue-400 font-bold text-sm">
+                    <i class="fa-brands fa-linkedin-in text-lg"></i> LinkedIn API
+                </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-medium text-gray-400 mb-1">LinkedIn Client ID</label>
-                        <input type="text" name="li_client_id" placeholder="Client ID from Developer Portal" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
+                    <div class="space-y-1">
+                        <label class="text-[11px] font-bold text-gray-400 uppercase">LinkedIn Client ID</label>
+                        <input type="text" name="li_client_id" placeholder="Client ID from Developer Portal" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-white text-xs">
                     </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-400 mb-1">LinkedIn Client Secret</label>
-                        <input type="password" name="li_client_secret" placeholder="Client Secret Key" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
+                    <div class="space-y-1">
+                        <label class="text-[11px] font-bold text-gray-400 uppercase">LinkedIn Client Secret</label>
+                        <input type="password" name="li_client_secret" placeholder="Client Secret Key" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-white text-xs">
                     </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-xs font-medium text-gray-400 mb-1">Organization URN / Access Token</label>
-                        <input type="text" name="li_token" placeholder="e.g. urn:li:organization:XXXXXX or OAuth Token" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[11px] font-bold text-gray-400 uppercase">Organization URN / Access Token</label>
+                    <input type="text" name="li_org_urn" placeholder="e.g. urn:li:organization:XXXXXX or OAuth Token" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-white text-xs">
+                </div>
+            </div>
+
+            <!-- Facebook Pages -->
+            <div class="bg-gray-950 p-5 rounded-2xl border border-gray-800/80 space-y-4">
+                <div class="flex items-center gap-2 text-blue-600 font-bold text-sm">
+                    <i class="fa-brands fa-facebook-f text-lg"></i> Facebook Pages API
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <label class="text-[11px] font-bold text-gray-400 uppercase">Facebook Page ID</label>
+                        <input type="text" name="fb_page_id" placeholder="Your target Facebook Page ID" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-white text-xs">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[11px] font-bold text-gray-400 uppercase">Page Access Token</label>
+                        <input type="password" name="fb_token" placeholder="Permanent Page Access Token" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-white text-xs">
                     </div>
                 </div>
             </div>
 
-            <!-- Facebook -->
-            <div class="bg-gray-900/40 border border-gray-700/50 p-4 rounded-xl space-y-3">
-                <h3 class="text-white font-medium flex items-center gap-2">
-                    <i class="fa-brands fa-facebook text-blue-600"></i> Facebook Pages API
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-medium text-gray-400 mb-1">Facebook Page ID</label>
-                        <input type="text" name="fb_page_id" placeholder="Your target Facebook Page ID" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-400 mb-1">Page Access Token</label>
-                        <input type="password" name="fb_access_token" placeholder="Permanent Page Access Token" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
-                    </div>
-                </div>
-            </div>
-
-            <div class="pt-2">
-                <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white font-medium px-6 py-2.5 rounded-xl transition shadow-lg shadow-blue-600/30">
-                    Save Social Credentials
-                </button>
-            </div>
+            <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-xl shadow-lg transition">Save Social Credentials</button>
         </form>
-    </div>
-
-    <!-- General Application Preferences -->
-    <div class="bg-gray-800/60 border border-gray-700/60 rounded-2xl p-6 shadow-lg backdrop-blur-md">
-        <h2 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-            <i class="fa-solid fa-sliders text-purple-400"></i> General Preferences
-        </h2>
-        <div class="space-y-4">
-            <div class="flex items-center justify-between py-2 border-b border-gray-700/40">
-                <div>
-                    <h3 class="text-sm font-medium text-white">Email Notification Reports</h3>
-                    <p class="text-xs text-gray-400">Receive summary reports when batch posting completes.</p>
-                </div>
-                <label class="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" class="sr-only peer">
-                    <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                </label>
-            </div>
-            <div class="flex items-center justify-between py-2 border-b border-gray-700/40">
-                <div>
-                    <h3 class="text-sm font-medium text-white">Debug Logging Mode</h3>
-                    <p class="text-xs text-gray-400">Store detailed API response headers in local system logs.</p>
-                </div>
-                <label class="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" class="sr-only peer" checked>
-                    <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                </label>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-300 mb-1">Default Queue Timeout</label>
-                <select class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
-                    <option>30 Seconds</option>
-                    <option selected>60 Seconds</option>
-                    <option>120 Seconds</option>
-                </select>
-            </div>
-        </div>
-    </div>
-
-    <!-- System Info Panel -->
-    <div class="bg-gray-800/60 border border-gray-700/60 rounded-2xl p-6 shadow-lg backdrop-blur-md">
-        <h2 class="text-lg font-semibold text-white mb-3 flex items-center gap-2">
-            <i class="fa-solid fa-server text-emerald-400"></i> System Status
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-            <div class="bg-gray-900/50 p-4 rounded-xl border border-gray-700/40">
-                <span class="text-gray-400 block text-xs">Environment</span>
-                <span class="text-white font-medium">Codespaces / Production</span>
-            </div>
-            <div class="bg-gray-900/50 p-4 rounded-xl border border-gray-700/40">
-                <span class="text-gray-400 block text-xs">Framework</span>
-                <span class="text-white font-medium">Flask 3.x (Python)</span>
-            </div>
-            <div class="bg-gray-900/50 p-4 rounded-xl border border-gray-700/40">
-                <span class="text-gray-400 block text-xs">Database Connection</span>
-                <span class="text-emerald-400 font-medium flex items-center gap-1.5 mt-0.5"><span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Active</span>
-            </div>
-        </div>
     </div>
 </div>
 {% endblock %}

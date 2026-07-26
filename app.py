@@ -192,5 +192,14 @@ def analytics():
 def settings():
     return render_template('settings.html')
 
+
+@app.route('/update-account', methods=['POST'])
+def update_account():
+    # Handle account update logic here
+    return redirect(url_for('settings'))
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
+
+if __name__ == "__main__":
+    app.run(debug=True, port=5000)
