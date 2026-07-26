@@ -1,4 +1,7 @@
-{% extends "base.html" %}
+import os
+import re
+
+html_code = """{% extends "base.html" %}
 {% block title %}Nyla AutoPost — Enterprise Social Media Automation & Intelligence{% endblock %}
 
 {% block content %}
@@ -29,7 +32,7 @@
             <a href="/settings" class="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm tracking-wider uppercase px-8 py-4 rounded-2xl shadow-xl shadow-blue-600/25 transition-all transform hover:-translate-y-0.5">
                 Get Started Free <i class="fa-solid fa-arrow-right ml-2"></i>
             </a>
-            <a href="/demo" class="w-full sm:w-auto bg-gray-900/80 hover:bg-gray-800 text-gray-300 hover:text-white font-bold text-sm tracking-wider uppercase px-8 py-4 rounded-2xl border border-gray-800 transition-all">
+            <a href="/analytics" class="w-full sm:w-auto bg-gray-900/80 hover:bg-gray-800 text-gray-300 hover:text-white font-bold text-sm tracking-wider uppercase px-8 py-4 rounded-2xl border border-gray-800 transition-all">
                 Live Analytics Demo
             </a>
         </div>
@@ -117,3 +120,24 @@
     </div>
 </div>
 {% endblock %}
+"""
+
+# Force write the new HTML
+os.makedirs('templates', exist_ok=True)
+with open('templates/index.html', 'w') as f:
+    f.write(html_code)
+
+# Force fix the routing in app.py just in case it was pointing elsewhere
+try:
+    with open('app.py', 'r') as f:
+        app_code = f.read()
+    
+    # Ensure the root route points directly to index.html
+    if "render_template('index.html')" not in app_code and 'render_template("index.html")' not in app_code:
+        app_code = re.sub(r"@app\.route\('/'\)\ndef [a-zA-Z0-9_]+\(\):\n\s+return render_template\('[a-zA-Z0-9_.]+'\)", "@app.route('/')\ndef home():\n    return render_template('index.html')", app_code)
+        with open('app.py', 'w') as f:
+            f.write(app_code)
+except Exception as e:
+    pass
+
+print("\n\033[92mSUCCESS: index.html has been forcefully overwritten!\033[0m")

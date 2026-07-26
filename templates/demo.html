@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Live Analytics Demo — Nyla AutoPost{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto space-y-8 py-6 px-4">
+    <!-- Demo Mode Notification Banner -->
+    <div class="bg-gradient-to-r from-blue-900/40 via-purple-900/40 to-indigo-900/40 border border-blue-500/30 p-4 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4 backdrop-blur-md">
+        <div class="flex items-center gap-3 text-sm text-gray-200">
+            <span class="flex h-3 w-3 rounded-full bg-emerald-400 animate-ping"></span>
+            <span><strong>Live Interactive Demo:</strong> You are viewing sample platform metrics and active queue data.</span>
+        </div>
+        <a href="{{ url_for('settings') if current_user.is_authenticated else url_for('register') }}" class="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs uppercase tracking-wider px-5 py-2.5 rounded-xl transition whitespace-nowrap">
+            Create an Account
+        </a>
+    </div>
+
+    <!-- Analytics Stats Overview -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-gray-900/80 p-5 rounded-2xl border border-gray-800 space-y-1">
+            <span class="text-xs text-gray-400 font-medium uppercase">Total Audience Reach</span>
+            <h3 class="text-3xl font-black text-white">{{ stats.total_reach }}</h3>
+            <span class="text-xs text-emerald-400 font-bold">{{ stats.reach_growth }} this month</span>
+        </div>
+        <div class="bg-gray-900/80 p-5 rounded-2xl border border-gray-800 space-y-1">
+            <span class="text-xs text-gray-400 font-medium uppercase">Active Queue</span>
+            <h3 class="text-3xl font-black text-white">{{ stats.scheduled_count }} Posts</h3>
+            <span class="text-xs text-blue-400 font-bold">Next post in 45 mins</span>
+        </div>
+        <div class="bg-gray-900/80 p-5 rounded-2xl border border-gray-800 space-y-1">
+            <span class="text-xs text-gray-400 font-medium uppercase">Avg Engagement Rate</span>
+            <h3 class="text-3xl font-black text-white">{{ stats.avg_engagement }}</h3>
+            <span class="text-xs text-emerald-400 font-bold">+1.2% vs industry avg</span>
+        </div>
+        <div class="bg-gray-900/80 p-5 rounded-2xl border border-gray-800 space-y-1">
+            <span class="text-xs text-gray-400 font-medium uppercase">Connected Channels</span>
+            <h3 class="text-3xl font-black text-emerald-400">4 / 4 Active</h3>
+            <span class="text-xs text-gray-400 font-bold">API sync healthy</span>
+        </div>
+    </div>
+
+    <!-- Platform Breakdown Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Channels List -->
+        <div class="bg-gray-900/80 p-6 rounded-2xl border border-gray-800 space-y-4">
+            <h4 class="text-lg font-bold text-white">Channel Performance</h4>
+            <div class="space-y-3">
+                {% for p in stats.platforms %}
+                <div class="flex items-center justify-between p-3 bg-gray-950/60 rounded-xl border border-gray-800/80">
+                    <div>
+                        <p class="text-sm font-bold text-white">{{ p.name }}</p>
+                        <p class="text-xs text-gray-400">{{ p.followers }} followers • {{ p.posts }} posts</p>
+                    </div>
+                    <span class="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-md border border-emerald-500/20">{{ p.status }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Recent Posts Stream -->
+        <div class="lg:col-span-2 bg-gray-900/80 p-6 rounded-2xl border border-gray-800 space-y-4">
+            <h4 class="text-lg font-bold text-white">Recent Campaign Insights</h4>
+            <div class="space-y-3">
+                {% for item in stats.recent_activity %}
+                <div class="p-4 bg-gray-950/60 rounded-xl border border-gray-800/80 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-blue-400 uppercase tracking-wider">{{ item.platform }}</span>
+                        <span class="text-xs text-gray-500">{{ item.time }}</span>
+                    </div>
+                    <p class="text-sm font-semibold text-white">{{ item.title }}</p>
+                    <div class="flex gap-4 text-xs text-gray-400 pt-1">
+                        <span><strong class="text-gray-200">{{ item.impressions }}</strong> Impressions</span>
+                        <span><strong class="text-gray-200">{{ item.likes }}</strong> Engagement</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

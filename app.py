@@ -4,6 +4,7 @@ import uuid
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
+app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.secret_key = 'supersecretkey'
 
 login_manager = LoginManager()
@@ -21,7 +22,7 @@ POSTS_DB = []
 
 @app.route('/')
 def index():
-    return render_template('landing.html')
+    return render_template('index.html')
 
 @app.route('/dashboard')
 @login_required
@@ -198,8 +199,128 @@ def update_account():
     # Handle account update logic here
     return redirect(url_for('settings'))
 
+
+@app.route('/demo')
+def live_demo():
+    mock_stats = {
+        'total_reach': '128.4K',
+        'reach_growth': '+24.2%',
+        'scheduled_count': 18,
+        'avg_engagement': '4.8%',
+        'platforms': [
+            {'name': 'X (Twitter)', 'followers': '14.2K', 'posts': 42, 'status': 'Connected'},
+            {'name': 'Facebook', 'followers': '38.9K', 'posts': 19, 'status': 'Connected'},
+            {'name': 'LinkedIn', 'followers': '8.5K', 'posts': 11, 'status': 'Connected'},
+            {'name': 'Instagram', 'followers': '66.8K', 'posts': 55, 'status': 'Connected'}
+        ],
+        'recent_activity': [
+            {'title': 'Q3 Product Teaser Video', 'platform': 'Instagram', 'time': '2 hours ago', 'impressions': '12.4K', 'likes': 840},
+            {'title': 'Weekly Industry Digest #42', 'platform': 'LinkedIn', 'time': 'Yesterday', 'impressions': '4.1K', 'likes': 195},
+            {'title': 'Feature Release Announcement', 'platform': 'X (Twitter)', 'time': '2 days ago', 'impressions': '18.9K', 'likes': 1210}
+        ]
+    }
+    return render_template('demo.html', stats=mock_stats)
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
 
+
+@app.route('/demo')
+def live_demo():
+    mock_stats = {
+        'total_reach': '128.4K',
+        'reach_growth': '+24.2%',
+        'scheduled_count': 18,
+        'avg_engagement': '4.8%',
+        'platforms': [
+            {'name': 'X (Twitter)', 'followers': '14.2K', 'posts': 42, 'status': 'Connected'},
+            {'name': 'Facebook', 'followers': '38.9K', 'posts': 19, 'status': 'Connected'},
+            {'name': 'LinkedIn', 'followers': '8.5K', 'posts': 11, 'status': 'Connected'},
+            {'name': 'Instagram', 'followers': '66.8K', 'posts': 55, 'status': 'Connected'}
+        ],
+        'recent_activity': [
+            {'title': 'Q3 Product Teaser Video', 'platform': 'Instagram', 'time': '2 hours ago', 'impressions': '12.4K', 'likes': 840},
+            {'title': 'Weekly Industry Digest #42', 'platform': 'LinkedIn', 'time': 'Yesterday', 'impressions': '4.1K', 'likes': 195},
+            {'title': 'Feature Release Announcement', 'platform': 'X (Twitter)', 'time': '2 days ago', 'impressions': '18.9K', 'likes': 1210}
+        ]
+    }
+    return render_template('demo.html', stats=mock_stats)
+
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
+
+
+
+@app.route('/test-x', methods=['POST'])
+def test_x():
+    user_email = session.get('user_email', 'demo@nyla.com')
+    conn = sqlite3.connect(DB_FILE)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute("SELECT * FROM credentials WHERE user_email = ?", (user_email,))
+    creds = c.fetchone()
+    conn.close()
+    
+    if not creds or not creds['x_api_key']:
+        flash('No X API keys found. Save your credentials first.', 'error')
+        return redirect(url_for('settings'))
+    
+    # Test ping to Twitter API v2
+    url = "https://api.twitter.com/2/tweets/sample/stream" # Or verify credentials endpoint
+    auth = OAuth1(creds['x_api_key'], creds['x_api_secret'], creds['x_access_token'], creds['x_access_secret'])
+    try:
+        res = requests.get("https://api.twitter.com/2/users/me", auth=auth, timeout=5)
+        if res.status_code == 200:
+            flash('X (Twitter) API connection verified successfully!', 'success')
+        else:
+            flash('X API verification failed. Check your keys and access tokens.', 'error')
+    except Exception:
+        flash('Could not reach X API server. Network timeout.', 'error')
+    return redirect(url_for('settings'))
+
+@app.route('/test-fb', methods=['POST'])
+def test_fb():
+    user_email = session.get('user_email', 'demo@nyla.com')
+    conn = sqlite3.connect(DB_FILE)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute("SELECT * FROM credentials WHERE user_email = ?", (user_email,))
+    creds = c.fetchone()
+    conn.close()
+    
+    if not creds or not creds['fb_page_token']:
+        flash('No Facebook Page Token found.', 'error')
+        return redirect(url_for('settings'))
+    
+    try:
+        res = requests.get(f"https://graph.facebook.com/v19.0/me?access_token={creds['fb_page_token']}", timeout=5)
+        if res.status_code == 200:
+            flash('Facebook Page Token verified successfully!', 'success')
+        else:
+            flash('Facebook token invalid or expired.', 'error')
+    except Exception:
+        flash('Could not reach Facebook Graph API.', 'error')
+    return redirect(url_for('settings'))
+
+
+@app.route('/demo')
+def live_demo():
+    # Sample analytics data for preview
+    mock_stats = {
+        'total_reach': '128.4K',
+        'reach_growth': '+24.2%',
+        'scheduled_count': 18,
+        'avg_engagement': '4.8%',
+        'platforms': [
+            {'name': 'X (Twitter)', 'followers': '14.2K', 'posts': 42, 'status': 'Connected'},
+            {'name': 'Facebook', 'followers': '38.9K', 'posts': 19, 'status': 'Connected'},
+            {'name': 'LinkedIn', 'followers': '8.5K', 'posts': 11, 'status': 'Connected'},
+            {'name': 'Instagram', 'followers': '66.8K', 'posts': 55, 'status': 'Connected'}
+        ],
+        'recent_activity': [
+            {'title': 'Q3 Product Teaser Video', 'platform': 'Instagram', 'time': '2 hours ago', 'impressions': '12.4K', 'likes': 840},
+            {'title': 'Weekly Industry Digest #42', 'platform': 'LinkedIn', 'time': 'Yesterday', 'impressions': '4.1K', 'likes': 195},
+            {'title': 'Feature Release Announcement', 'platform': 'X (Twitter)', 'time': '2 days ago', 'impressions': '18.9K', 'likes': 1210}
+        ]
+    }
+    return render_template('demo.html', stats=mock_stats)

@@ -9,7 +9,7 @@
             <i class="fa-solid fa-gear text-2xl"></i>
             <h1 class="text-2xl font-black text-white">Settings & Configuration</h1>
         </div>
-        <p class="text-gray-400 text-xs md:text-sm">Manage your profile credentials and social platform API connections.</p>
+        <p class="text-gray-400 text-xs md:text-sm">Manage your profile credentials and live social platform API connections.</p>
     </div>
 
     <!-- Account & Security -->
@@ -58,85 +58,95 @@
         <form method="POST" action="/save-credentials" class="space-y-6">
             <!-- Instagram -->
             <div class="bg-gray-950 p-5 rounded-2xl border border-gray-800/80 space-y-4">
-                <div class="flex items-center gap-2 text-pink-500 font-bold text-sm">
-                    <i class="fa-brands fa-instagram text-lg"></i> Instagram Graph API
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2 text-pink-500 font-bold text-sm">
+                        <i class="fa-brands fa-instagram text-lg"></i> Instagram Graph API
+                    </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="space-y-1">
                         <label class="text-[11px] font-bold text-gray-400 uppercase">Instagram Business Account ID</label>
-                        <input type="text" name="ig_account_id" placeholder="e.g. 178414... (IG User ID)" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-white text-xs">
+                        <input type="text" name="ig_account_id" value="{{ creds.ig_account_id if creds and creds.ig_account_id else '' }}" placeholder="e.g. 178414..." class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-white text-xs">
                     </div>
                     <div class="space-y-1">
                         <label class="text-[11px] font-bold text-gray-400 uppercase">Facebook Page Access Token</label>
-                        <input type="password" name="fb_page_token" placeholder="Long-lived user/page access token" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-white text-xs">
+                        <input type="password" name="fb_page_token" value="{{ creds.fb_page_token if creds and creds.fb_page_token else '' }}" placeholder="Long-lived token" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-white text-xs">
                     </div>
                 </div>
             </div>
 
             <!-- X (Twitter) -->
             <div class="bg-gray-950 p-5 rounded-2xl border border-gray-800/80 space-y-4">
-                <div class="flex items-center gap-2 text-white font-bold text-sm">
-                    <i class="fa-brands fa-x-twitter text-lg"></i> X (Twitter) API v2
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2 text-white font-bold text-sm">
+                        <i class="fa-brands fa-x-twitter text-lg"></i> X (Twitter) API v2
+                    </div>
+                    <button type="submit" formaction="/test-x" formmethod="POST" class="bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg border border-gray-800 transition">Test X Connection</button>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="space-y-1">
                         <label class="text-[11px] font-bold text-gray-400 uppercase">Consumer Key / API Key</label>
-                        <input type="text" name="x_api_key" placeholder="API Key from X Developer Portal" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-white text-xs">
+                        <input type="text" name="x_api_key" value="{{ creds.x_api_key if creds and creds.x_api_key else '' }}" placeholder="API Key" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-white text-xs">
                     </div>
                     <div class="space-y-1">
                         <label class="text-[11px] font-bold text-gray-400 uppercase">Consumer Secret / API Secret</label>
-                        <input type="password" name="x_api_secret" placeholder="API Secret Key" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-white text-xs">
+                        <input type="password" name="x_api_secret" value="{{ creds.x_api_secret if creds and creds.x_api_secret else '' }}" placeholder="API Secret" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-white text-xs">
                     </div>
                     <div class="space-y-1">
                         <label class="text-[11px] font-bold text-gray-400 uppercase">Access Token</label>
-                        <input type="text" name="x_access_token" placeholder="User Access Token" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-white text-xs">
+                        <input type="text" name="x_access_token" value="{{ creds.x_access_token if creds and creds.x_access_token else '' }}" placeholder="Access Token" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-white text-xs">
                     </div>
                     <div class="space-y-1">
                         <label class="text-[11px] font-bold text-gray-400 uppercase">Access Token Secret</label>
-                        <input type="password" name="x_access_secret" placeholder="User Access Token Secret" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-white text-xs">
+                        <input type="password" name="x_access_secret" value="{{ creds.x_access_secret if creds and creds.x_access_secret else '' }}" placeholder="Access Secret" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-white text-xs">
                     </div>
                 </div>
             </div>
 
             <!-- LinkedIn -->
             <div class="bg-gray-950 p-5 rounded-2xl border border-gray-800/80 space-y-4">
-                <div class="flex items-center gap-2 text-blue-400 font-bold text-sm">
-                    <i class="fa-brands fa-linkedin-in text-lg"></i> LinkedIn API
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2 text-blue-400 font-bold text-sm">
+                        <i class="fa-brands fa-linkedin-in text-lg"></i> LinkedIn API
+                    </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="space-y-1">
                         <label class="text-[11px] font-bold text-gray-400 uppercase">LinkedIn Client ID</label>
-                        <input type="text" name="li_client_id" placeholder="Client ID from Developer Portal" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-white text-xs">
+                        <input type="text" name="li_client_id" value="{{ creds.li_client_id if creds and creds.li_client_id else '' }}" placeholder="Client ID" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-white text-xs">
                     </div>
                     <div class="space-y-1">
                         <label class="text-[11px] font-bold text-gray-400 uppercase">LinkedIn Client Secret</label>
-                        <input type="password" name="li_client_secret" placeholder="Client Secret Key" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-white text-xs">
+                        <input type="password" name="li_client_secret" value="{{ creds.li_client_secret if creds and creds.li_client_secret else '' }}" placeholder="Client Secret" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-white text-xs">
                     </div>
                 </div>
                 <div class="space-y-1">
                     <label class="text-[11px] font-bold text-gray-400 uppercase">Organization URN / Access Token</label>
-                    <input type="text" name="li_org_urn" placeholder="e.g. urn:li:organization:XXXXXX or OAuth Token" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-white text-xs">
+                    <input type="text" name="li_org_urn" value="{{ creds.li_org_urn if creds and creds.li_org_urn else '' }}" placeholder="urn:li:organization:XXXXXX" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-white text-xs">
                 </div>
             </div>
 
             <!-- Facebook Pages -->
             <div class="bg-gray-950 p-5 rounded-2xl border border-gray-800/80 space-y-4">
-                <div class="flex items-center gap-2 text-blue-600 font-bold text-sm">
-                    <i class="fa-brands fa-facebook-f text-lg"></i> Facebook Pages API
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2 text-blue-600 font-bold text-sm">
+                        <i class="fa-brands fa-facebook-f text-lg"></i> Facebook Pages API
+                    </div>
+                    <button type="submit" formaction="/test-fb" formmethod="POST" class="bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg border border-gray-800 transition">Test FB Connection</button>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="space-y-1">
                         <label class="text-[11px] font-bold text-gray-400 uppercase">Facebook Page ID</label>
-                        <input type="text" name="fb_page_id" placeholder="Your target Facebook Page ID" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-white text-xs">
+                        <input type="text" name="fb_page_id" value="{{ creds.fb_page_id if creds and creds.fb_page_id else '' }}" placeholder="Page ID" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-white text-xs">
                     </div>
                     <div class="space-y-1">
                         <label class="text-[11px] font-bold text-gray-400 uppercase">Page Access Token</label>
-                        <input type="password" name="fb_token" placeholder="Permanent Page Access Token" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-white text-xs">
+                        <input type="password" name="fb_page_token" value="{{ creds.fb_page_token if creds and creds.fb_page_token else '' }}" placeholder="Page Access Token" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-white text-xs">
                     </div>
                 </div>
             </div>
 
-            <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-xl shadow-lg transition">Save Social Credentials</button>
+            <button type="submit" formaction="/save-credentials" formmethod="POST" class="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-xl shadow-lg transition">Save Social Credentials</button>
         </form>
     </div>
 </div>
