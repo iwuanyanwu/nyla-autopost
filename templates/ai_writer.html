@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}AI Writer — Nyla AutoPost{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6 py-4 px-2 sm:px-4 relative pb-12">
+
+    <!-- Ambient Glow -->
+    <div class="absolute -top-10 left-1/2 -translate-x-1/2 w-[80%] h-[250px] bg-gradient-to-tr from-purple-600/20 via-blue-600/15 to-indigo-600/20 blur-[100px] rounded-full pointer-events-none -z-10"></div>
+
+    <!-- Header Section -->
+    <div class="bg-gray-900/90 p-6 rounded-3xl border border-gray-800 shadow-2xl backdrop-blur-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <div class="inline-flex items-center gap-2 bg-purple-500/10 border border-purple-500/20 px-3 py-1 rounded-full text-xs font-bold text-purple-400 mb-2">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Neural Generation Engine
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">AI Content Studio</h1>
+            <p class="text-xs sm:text-sm text-gray-400">Generate high-converting multi-channel copy instantly using AI.</p>
+        </div>
+        <a href="/dashboard" class="inline-flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-white font-bold text-xs uppercase tracking-wider px-4 py-2.5 rounded-xl transition">
+            <i class="fa-solid fa-arrow-left"></i> Dashboard
+        </a>
+    </div>
+
+    <!-- AI Generator Interface -->
+    <div class="bg-gray-900/80 p-6 rounded-3xl border border-gray-800 shadow-2xl space-y-6">
+        
+        <!-- Prompt Form -->
+        <form action="/ai-writer" method="POST" class="space-y-4">
+            <div class="space-y-2">
+                <label class="text-xs font-bold text-gray-300 uppercase tracking-wider block">What would you like to post about?</label>
+                <textarea name="prompt" rows="3" placeholder="e.g., Announcing our new B2B sourcing capabilities for electronic components..." class="w-full bg-gray-950/80 border border-gray-800 rounded-2xl p-4 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-purple-500 transition shadow-inner"></textarea>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-gray-300 uppercase tracking-wider block">Tone of Voice</label>
+                    <select name="tone" class="w-full bg-gray-950/80 border border-gray-800 rounded-xl p-3 text-xs text-gray-200 focus:outline-none focus:border-purple-500 transition">
+                        <option value="professional">Professional & Corporate</option>
+                        <option value="casual">Casual & Engaging</option>
+                        <option value="bold">Bold & Direct</option>
+                        <option value="promotional">Promotional & Urgent</option>
+                    </select>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-gray-300 uppercase tracking-wider block">Target Platform</label>
+                    <select name="platform" class="w-full bg-gray-950/80 border border-gray-800 rounded-xl p-3 text-xs text-gray-200 focus:outline-none focus:border-purple-500 transition">
+                        <option value="all">All Connected Channels (Cross-Post)</option>
+                        <option value="twitter">X / Twitter (Short & Punchy)</option>
+                        <option value="linkedin">LinkedIn (Thought Leadership)</option>
+                        <option value="instagram">Instagram (Visual Caption)</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs uppercase tracking-wider rounded-2xl shadow-lg shadow-purple-600/20 transition active:scale-[0.99] flex items-center justify-center gap-2">
+                <i class="fa-solid fa-sparkles"></i> Generate AI Copy
+            </button>
+        </form>
+
+        <!-- Output Preview Box (Conditional or Interactive State) -->
+        <div class="pt-4 border-t border-gray-800 space-y-3">
+            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Generated Output Preview</h3>
+            
+            <div class="p-4 bg-gray-950/70 border border-gray-800 rounded-2xl space-y-3 text-sm text-gray-300">
+                <div class="flex items-center justify-between text-xs text-gray-500">
+                    <span class="font-mono text-purple-400">Awaiting prompt input...</span>
+                    <span>0 characters</span>
+                </div>
+                <p class="text-xs text-gray-400 italic">Your generated multi-channel social copy will appear here ready for execution.</p>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

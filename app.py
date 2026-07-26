@@ -221,6 +221,12 @@ def live_demo():
     }
     return render_template('demo.html', stats=mock_stats)
 
+
+@app.route('/ai-writer')
+@login_required
+def ai_writer():
+    return render_template('ai_writer.html')
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
 
@@ -324,3 +330,5 @@ def live_demo():
         ]
     }
     return render_template('demo.html', stats=mock_stats)
+
+

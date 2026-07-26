@@ -1,76 +1,161 @@
-{% extends "base.html" %}
-{% block title %}Dashboard – Nyla AutoPost{% endblock %}
-
-{% block content %}
-<div class="space-y-8">
-    <!-- Welcome Header -->
-    <div class="bg-gray-900/80 p-6 md:p-8 rounded-3xl border border-gray-800 shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-            <h1 class="text-2xl font-black text-white">Welcome Back 👋</h1>
-            <p class="text-gray-400 text-xs md:text-sm mt-1">Manage and track your multi-channel posts effortlessly.</p>
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Nyla AutoPost</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-[#090a0f] text-gray-100 font-sans min-h-screen flex flex-col justify-between pb-20">
+    
+    <header class="border-b border-gray-800/60 bg-[#0c0e14]/80 backdrop-blur-md sticky top-0 z-50 px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-purple-500/20">
+                <span class="text-white font-bold text-lg">N</span>
+            </div>
+            <span class="font-bold text-lg tracking-wide text-white">Nyla <span class="text-purple-400 font-light">AutoPost</span></span>
         </div>
-        <a href="{{ url_for('compose') }}" class="px-6 py-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-pink-600 hover:opacity-90 text-white font-bold rounded-xl transition shadow-lg shadow-blue-500/25 text-sm flex items-center gap-2">
-            <i class="fa-solid fa-plus"></i> New Post
+        <a href="/logout" class="px-4 py-1.5 rounded-lg border border-gray-800 hover:border-red-500/30 text-xs font-semibold tracking-wider text-gray-300 hover:text-red-400 transition-all">
+            <i class="fa-solid fa-right-from-bracket mr-1.5"></i> LOGOUT
         </a>
-    </div>
+    </header>
 
-    <!-- Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-gray-900/80 p-6 rounded-3xl border border-gray-800 shadow-lg">
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Total Posts</p>
-            <h3 class="text-3xl font-black text-white">{{ total_posts }}</h3>
-        </div>
-        <div class="bg-gray-900/80 p-6 rounded-3xl border border-gray-800 shadow-lg">
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Published</p>
-            <h3 class="text-3xl font-black text-emerald-400">{{ published }}</h3>
-        </div>
-        <div class="bg-gray-900/80 p-6 rounded-3xl border border-gray-800 shadow-lg">
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Scheduled</p>
-            <h3 class="text-3xl font-black text-amber-400">{{ scheduled }}</h3>
-        </div>
-    </div>
-
-    <!-- Content Queue -->
-    <div class="bg-gray-900/80 p-6 md:p-8 rounded-3xl border border-gray-800 shadow-xl space-y-6">
-        <h2 class="text-lg font-bold text-white">Recent Content Queue</h2>
+    <main class="max-w-6xl w-full mx-auto p-6 space-y-6 flex-grow">
         
-        <div class="space-y-4">
-            {% if recent_posts %}
-                {% for post in recent_posts %}
-                <div class="bg-gray-950 p-5 rounded-2xl border border-gray-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div class="space-y-2">
-                        <p class="text-white font-medium text-sm">{{ post.content }}</p>
-                        <div class="flex items-center gap-3 text-xs text-gray-400 font-mono">
-                            <span><i class="fa-regular fa-calendar"></i> {{ post.scheduled_at.strftime('%b %d, %H:%M') if post.scheduled_at else 'N/A' }}</span>
-                            <span class="text-blue-400 font-sans font-bold"><i class="fa-solid fa-share-nodes"></i> {{ post.platforms | title }}</span>
-                        </div>
-                    </div>
-                    
-                    <div class="flex flex-wrap items-center gap-2 mt-2 sm:mt-0">
-                        {% if post.status == 'published' %}
-                            <span class="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Published</span>
-                        {% else %}
-                            <span class="px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">Pending</span>
-                            
-                            <!-- Edit and Delete only show for Pending posts -->
-                            <a href="{{ url_for('edit_post', post_id=post.id) }}" class="px-3 py-1.5 bg-blue-600/10 border border-blue-500/30 text-blue-400 hover:bg-blue-600 hover:text-white rounded-xl transition text-xs font-bold flex items-center gap-1.5">
-                                <i class="fa-solid fa-pen"></i> Edit
-                            </a>
-                            <form action="{{ url_for('delete_post', post_id=post.id) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this post?');">
-                                <button type="submit" class="px-3 py-1.5 bg-red-600/10 border border-red-500/30 text-red-400 hover:bg-red-600 hover:text-white rounded-xl transition text-xs font-bold flex items-center gap-1.5">
-                                    <i class="fa-solid fa-trash"></i> Delete
-                                </button>
-                            </form>
-                        {% endif %}
-                    </div>
+        <div class="p-6 rounded-2xl bg-gradient-to-r from-[#131622] to-[#10121a] border border-gray-800/80 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div class="space-y-1">
+                <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium mb-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Engine Online
                 </div>
-                {% endfor %}
-            {% else %}
-                <div class="text-center py-8 text-gray-500 text-sm">
-                    No posts yet.
-                </div>
-            {% endif %}
+                <h1 class="text-2xl font-bold tracking-tight text-white">Welcome Back 👋</h1>
+                <p class="text-sm text-gray-400">Multi-channel cross-posting & automated distribution engine.</p>
+            </div>
+            <a href="/compose" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-medium text-sm shadow-lg shadow-purple-600/25 flex items-center gap-2 transition-all">
+                <i class="fa-solid fa-paper-plane text-xs"></i> CREATE CAMPAIGN
+            </a>
         </div>
-    </div>
-</div>
-{% endblock %}
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="p-5 rounded-2xl bg-[#10121a] border border-gray-800/80 relative overflow-hidden">
+                <div class="flex items-center justify-between text-gray-400 text-xs uppercase tracking-wider mb-2">
+                    <span>Total Executions</span>
+                    <i class="fa-solid fa-server text-purple-400 p-2 rounded-lg bg-purple-500/10 border border-purple-500/20"></i>
+                </div>
+                <div class="text-3xl font-extrabold text-white">0</div>
+                <div class="text-xs text-gray-500 mt-1">all-time posts</div>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-[#10121a] border border-gray-800/80 relative overflow-hidden">
+                <div class="flex items-center justify-between text-gray-400 text-xs uppercase tracking-wider mb-2">
+                    <span>Live & Delivered</span>
+                    <i class="fa-solid fa-circle-check text-emerald-400 p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20"></i>
+                </div>
+                <div class="text-3xl font-extrabold text-emerald-400">0</div>
+                <div class="text-xs text-gray-500 mt-1">published</div>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-[#10121a] border border-gray-800/80 relative overflow-hidden">
+                <div class="flex items-center justify-between text-gray-400 text-xs uppercase tracking-wider mb-2">
+                    <span>Scheduled Queue</span>
+                    <i class="fa-solid fa-clock text-amber-400 p-2 rounded-lg bg-amber-500/10 border border-amber-500/20"></i>
+                </div>
+                <div class="text-3xl font-extrabold text-amber-400">0</div>
+                <div class="text-xs text-gray-500 mt-1">pending dispatch</div>
+            </div>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-[#10121a] border border-gray-800/80 flex items-center gap-3 flex-wrap">
+            <span class="text-xs text-gray-400 uppercase tracking-wider font-semibold mr-1">Connected API Nodes:</span>
+            
+            <div class="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-xs text-emerald-400 flex items-center gap-1.5 font-medium">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> X / Twitter
+            </div>
+            <div class="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-xs text-emerald-400 flex items-center gap-1.5 font-medium">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Facebook
+            </div>
+            <div class="px-3 py-1 bg-gray-800/80 border border-gray-700/50 rounded-full text-xs text-gray-400 flex items-center gap-1.5 font-medium">
+                <span class="w-1.5 h-1.5 rounded-full bg-gray-500"></span> LinkedIn (Disconnected)
+            </div>
+            <div class="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-xs text-emerald-400 flex items-center gap-1.5 font-medium">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Instagram
+            </div>
+        </div>
+
+        <div class="p-6 rounded-2xl bg-[#10121a] border border-gray-800/80 space-y-4">
+            <div class="flex items-center gap-2 text-sm font-semibold text-gray-300">
+                <span class="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span> RECENT CONTENT STREAM
+            </div>
+            <div class="p-12 rounded-xl border border-dashed border-gray-800 text-center flex flex-col items-center justify-center space-y-3">
+                <div class="w-12 h-12 rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </div>
+                <div class="space-y-1">
+                    <h3 class="text-sm font-semibold text-gray-200">No active queue items</h3>
+                    <p class="text-xs text-gray-500 max-w-sm">Dispatch posts instantly or schedule automated releases across all 4 connected networks.</p>
+                </div>
+                <a href="/compose" class="px-4 py-2 rounded-xl bg-purple-600/20 border border-purple-500/30 text-purple-300 hover:bg-purple-600/30 text-xs font-semibold transition-all flex items-center gap-2 mt-2">
+                    <i class="fa-solid fa-pen-nib"></i> COMPOSE FIRST POST
+                </a>
+            </div>
+        </div>
+
+        <div class="space-y-3">
+            <h2 class="text-xs uppercase tracking-wider text-gray-400 font-semibold">Command Shortcuts</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <a href="/ai-writer" class="p-4 rounded-xl bg-[#10121a] border border-gray-800/80 hover:border-purple-500/40 flex items-center gap-4 transition-all group">
+                    <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 group-hover:scale-105 transition-transform">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </div>
+                    <div>
+                        <div class="text-sm font-semibold text-white">AI WRITER</div>
+                        <div class="text-xs text-gray-400">Generate high-converting copy</div>
+                    </div>
+                </a>
+
+                <a href="/settings" class="p-4 rounded-xl bg-[#10121a] border border-gray-800/80 hover:border-emerald-500/40 flex items-center gap-4 transition-all group">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:scale-105 transition-transform">
+                        <i class="fa-solid fa-key"></i>
+                    </div>
+                    <div>
+                        <div class="text-sm font-semibold text-white">API KEYS</div>
+                        <div class="text-xs text-gray-400">Manage platform credentials</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="p-4 rounded-xl bg-[#10121a] border border-gray-800/80 flex flex-col md:flex-row items-center justify-between text-xs gap-3">
+            <div class="flex items-center gap-3">
+                <span class="text-gray-400 uppercase tracking-wider font-semibold">System Health:</span>
+                <span class="px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold rounded-lg">99.9%</span>
+            </div>
+            <div class="flex items-center gap-6 text-gray-400">
+                <div>Database Sync: <span class="text-emerald-400 font-medium">Active</span></div>
+                <div>Auto-Scheduler: <span class="text-emerald-400 font-medium">Ready</span></div>
+            </div>
+        </div>
+
+    </main>
+
+    <nav class="fixed bottom-0 left-0 right-0 border-t border-gray-800/80 bg-[#0c0e14]/90 backdrop-blur-md py-3 px-6 flex items-center justify-around z-40">
+        <a href="/dashboard" class="flex flex-col items-center gap-1 text-purple-400">
+            <i class="fa-solid fa-chart-pie text-sm"></i>
+            <span class="text-[10px] font-medium tracking-wide">Dashboard</span>
+        </a>
+        <a href="/compose" class="flex flex-col items-center gap-1 text-gray-400 hover:text-gray-200 transition-colors">
+            <i class="fa-solid fa-pen-to-square text-sm"></i>
+            <span class="text-[10px] font-medium tracking-wide">Compose</span>
+        </a>
+        <a href="/analytics" class="flex flex-col items-center gap-1 text-gray-400 hover:text-gray-200 transition-colors">
+            <i class="fa-solid fa-chart-line text-sm"></i>
+            <span class="text-[10px] font-medium tracking-wide">Analytics</span>
+        </a>
+        <a href="/settings" class="flex flex-col items-center gap-1 text-gray-400 hover:text-gray-200 transition-colors">
+            <i class="fa-solid fa-gear text-sm"></i>
+            <span class="text-[10px] font-medium tracking-wide">Settings</span>
+        </a>
+    </nav>
+
+</body>
+</html>
