@@ -62,7 +62,6 @@ def login():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        # Handle registration logic or redirect straight to login/dashboard
         user = SimpleUser(1)
         login_user(user)
         return redirect(url_for('dashboard'))
@@ -154,7 +153,27 @@ def delete_post(post_id):
 @app.route('/analytics')
 @login_required
 def analytics():
-    return render_template('analytics.html')
+    total_posts = len(POSTS_DB)
+    published_count = sum(1 for p in POSTS_DB if p['status'] == 'published')
+    scheduled_count = sum(1 for p in POSTS_DB if p['status'] == 'pending')
+    
+    # Platform counts
+    ig_count = sum(1 for p in POSTS_DB if 'instagram' in p.get('platforms', '').lower())
+    x_count = sum(1 for p in POSTS_DB if ' x' in p.get('platforms', '').lower() or p.get('platforms', '').lower().startswith('x'))
+    li_count = sum(1 for p in POSTS_DB if 'linkedin' in p.get('platforms', '').lower())
+    fb_count = sum(1 for p in POSTS_DB if 'facebook' in p.get('platforms', '').lower())
+
+    return render_template(
+        'analytics.html',
+        total_posts=total_posts,
+        published_count=published_count,
+        scheduled_count=scheduled_count,
+        ig_count=ig_count,
+        x_count=x_count,
+        li_count=li_count,
+        fb_count=fb_count,
+        posts=POSTS_DB
+    )
 
 @app.route('/settings')
 @login_required

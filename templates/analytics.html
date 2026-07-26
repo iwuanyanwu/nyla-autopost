@@ -1,131 +1,119 @@
 {% extends "base.html" %}
+{% block title %}Analytics – Nyla AutoPost{% endblock %}
+
 {% block content %}
-<div class="max-w-5xl mx-auto space-y-6">
+<div class="space-y-8">
     <!-- Header -->
-    <div class="bg-gray-800/60 border border-gray-700/60 rounded-2xl p-6 shadow-lg backdrop-blur-md">
-        <h1 class="text-2xl font-bold text-white flex items-center gap-3">
-            <i class="fa-solid fa-chart-line text-emerald-400"></i> Analytics & Performance
-        </h1>
-        <p class="text-gray-400 text-sm mt-1">Track publishing metrics, platform distribution, and individual post engagement.</p>
+    <div class="bg-gray-900/80 p-6 md:p-8 rounded-3xl border border-gray-800 shadow-xl space-y-2">
+        <div class="flex items-center gap-3 text-blue-400">
+            <i class="fa-solid fa-chart-line text-2xl"></i>
+            <h1 class="text-2xl font-black text-white">Analytics & Performance</h1>
+        </div>
+        <p class="text-gray-400 text-xs md:text-sm">Track publishing metrics, platform distribution, and individual post engagement.</p>
     </div>
 
-    <!-- Metrics Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="bg-gray-800/60 border border-gray-700/60 rounded-2xl p-6 shadow-lg backdrop-blur-md">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-gray-400">Total Posts</p>
-                    <h3 class="text-3xl font-bold text-white mt-2">{{ total_posts | default(0) }}</h3>
-                </div>
-                <div class="w-12 h-12 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 text-xl">
-                    <i class="fa-solid fa-layer-group"></i>
-                </div>
+    <!-- Overview Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-gray-900/80 p-6 rounded-3xl border border-gray-800 shadow-lg flex items-center justify-between">
+            <div class="space-y-1">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Posts</p>
+                <h3 class="text-3xl font-black text-white">{{ total_posts }}</h3>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+                <i class="fa-solid fa-layer-group text-xl"></i>
             </div>
         </div>
-        <div class="bg-gray-800/60 border border-gray-700/60 rounded-2xl p-6 shadow-lg backdrop-blur-md">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-gray-400">Published</p>
-                    <h3 class="text-3xl font-bold text-emerald-400 mt-2">{{ published | default(0) }}</h3>
-                </div>
-                <div class="w-12 h-12 rounded-xl bg-emerald-600/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xl">
-                    <i class="fa-solid fa-circle-check"></i>
-                </div>
+
+        <div class="bg-gray-900/80 p-6 rounded-3xl border border-gray-800 shadow-lg flex items-center justify-between">
+            <div class="space-y-1">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Published</p>
+                <h3 class="text-3xl font-black text-emerald-400">{{ published_count }}</h3>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                <i class="fa-solid fa-circle-check text-xl"></i>
             </div>
         </div>
-        <div class="bg-gray-800/60 border border-gray-700/60 rounded-2xl p-6 shadow-lg backdrop-blur-md">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-gray-400">Scheduled / Queue</p>
-                    <h3 class="text-3xl font-bold text-amber-400 mt-2">{{ scheduled | default(0) }}</h3>
-                </div>
-                <div class="w-12 h-12 rounded-xl bg-amber-600/20 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xl">
-                    <i class="fa-solid fa-clock"></i>
-                </div>
+
+        <div class="bg-gray-900/80 p-6 rounded-3xl border border-gray-800 shadow-lg flex items-center justify-between">
+            <div class="space-y-1">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Scheduled / Queue</p>
+                <h3 class="text-3xl font-black text-amber-400">{{ scheduled_count }}</h3>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                <i class="fa-solid fa-clock text-xl"></i>
             </div>
         </div>
     </div>
 
-    <!-- Platform Breakdown -->
-    <div class="bg-gray-800/60 border border-gray-700/60 rounded-2xl p-6 shadow-lg backdrop-blur-md space-y-4">
-        <h2 class="text-lg font-semibold text-white flex items-center gap-2">
-            <i class="fa-solid fa-chart-pie text-purple-400"></i> Platform Distribution
+    <!-- Platform Distribution -->
+    <div class="bg-gray-900/80 p-6 md:p-8 rounded-3xl border border-gray-800 shadow-xl space-y-6">
+        <h2 class="text-lg font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-chart-pie text-indigo-400"></i> Platform Distribution
         </h2>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-2">
-            <div class="bg-gray-900/40 p-4 rounded-xl border border-gray-700/50 text-center">
-                <i class="fa-brands fa-instagram text-pink-400 text-2xl mb-2"></i>
-                <span class="block text-gray-400 text-xs">Instagram</span>
-                <span class="text-white font-bold text-lg">{{ ig_count | default(0) }}</span>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bg-gray-950 p-5 rounded-2xl border border-gray-800/80 text-center space-y-2">
+                <i class="fa-brands fa-instagram text-pink-500 text-2xl"></i>
+                <p class="text-xs font-bold text-gray-400">Instagram</p>
+                <p class="text-2xl font-black text-white">{{ ig_count }}</p>
             </div>
-            <div class="bg-gray-900/40 p-4 rounded-xl border border-gray-700/50 text-center">
-                <i class="fa-brands fa-x-twitter text-white text-2xl mb-2"></i>
-                <span class="block text-gray-400 text-xs">X (Twitter)</span>
-                <span class="text-white font-bold text-lg">{{ x_count | default(0) }}</span>
+            <div class="bg-gray-950 p-5 rounded-2xl border border-gray-800/80 text-center space-y-2">
+                <i class="fa-brands fa-x-twitter text-white text-2xl"></i>
+                <p class="text-xs font-bold text-gray-400">X (Twitter)</p>
+                <p class="text-2xl font-black text-white">{{ x_count }}</p>
             </div>
-            <div class="bg-gray-900/40 p-4 rounded-xl border border-gray-700/50 text-center">
-                <i class="fa-brands fa-linkedin text-blue-500 text-2xl mb-2"></i>
-                <span class="block text-gray-400 text-xs">LinkedIn</span>
-                <span class="text-white font-bold text-lg">{{ li_count | default(0) }}</span>
+            <div class="bg-gray-950 p-5 rounded-2xl border border-gray-800/80 text-center space-y-2">
+                <i class="fa-brands fa-linkedin-in text-blue-400 text-2xl"></i>
+                <p class="text-xs font-bold text-gray-400">LinkedIn</p>
+                <p class="text-2xl font-black text-white">{{ li_count }}</p>
             </div>
-            <div class="bg-gray-900/40 p-4 rounded-xl border border-gray-700/50 text-center">
-                <i class="fa-brands fa-facebook text-blue-600 text-2xl mb-2"></i>
-                <span class="block text-gray-400 text-xs">Facebook</span>
-                <span class="text-white font-bold text-lg">{{ fb_count | default(0) }}</span>
+            <div class="bg-gray-950 p-5 rounded-2xl border border-gray-800/80 text-center space-y-2">
+                <i class="fa-brands fa-facebook-f text-blue-600 text-2xl"></i>
+                <p class="text-xs font-bold text-gray-400">Facebook</p>
+                <p class="text-2xl font-black text-white">{{ fb_count }}</p>
             </div>
         </div>
     </div>
 
-    <!-- Per-Post Analytics Table -->
-    <div class="bg-gray-800/60 border border-gray-700/60 rounded-2xl p-6 shadow-lg backdrop-blur-md space-y-4">
-        <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+    <!-- Individual Post Performance Table -->
+    <div class="bg-gray-900/80 p-6 md:p-8 rounded-3xl border border-gray-800 shadow-xl space-y-6">
+        <h2 class="text-lg font-bold text-white flex items-center gap-2">
             <i class="fa-solid fa-table-list text-blue-400"></i> Individual Post Performance
         </h2>
+        
+        {% if posts %}
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm text-gray-300">
-                <thead class="bg-gray-900/60 text-xs uppercase text-gray-400 border-b border-gray-700">
+            <table class="w-full text-left text-xs">
+                <thead class="text-gray-400 border-b border-gray-800 uppercase tracking-wider">
                     <tr>
-                        <th class="px-4 py-3">Content Preview</th>
-                        <th class="px-4 py-3">Platform</th>
-                        <th class="px-4 py-3">Status</th>
-                        <th class="px-4 py-3 text-center">Likes</th>
-                        <th class="px-4 py-3 text-center">Comments</th>
+                        <th class="pb-3 px-4">Content Preview</th>
+                        <th class="pb-3 px-4">Platform(s)</th>
+                        <th class="pb-3 px-4">Status</th>
+                        <th class="pb-3 px-4">Scheduled / Date</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-700/40">
-                    {% if posts %}
-                        {% for post in posts %}
-                        <tr class="hover:bg-gray-900/30 transition">
-                            <td class="px-4 py-3 max-w-xs truncate text-white font-medium">
-                                {{ post.content | default(post.title | default('Untitled Post')) }}
-                            </td>
-                            <td class="px-4 py-3">
-                                <span class="px-2.5 py-1 rounded-lg text-xs font-medium bg-gray-900 border border-gray-700 text-gray-300">
-                                    {{ post.platform | default('All Platforms') }}
-                                </span>
-                            </td>
-                            <td class="px-4 py-3">
-                                <span class="px-2.5 py-1 rounded-full text-xs font-semibold {% if post.status == 'published' %}bg-emerald-500/20 text-emerald-400 border border-emerald-500/30{% else %}bg-amber-500/20 text-amber-400 border border-amber-500/30{% endif %}">
-                                    {{ post.status | default('published') | capitalize }}
-                                </span>
-                            </td>
-                            <td class="px-4 py-3 text-center font-bold text-white">
-                                {{ post.likes | default(0) }}
-                            </td>
-                            <td class="px-4 py-3 text-center font-bold text-white">
-                                {{ post.comments | default(0) }}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    {% else %}
-                        <tr>
-                            <td colspan="5" class="px-4 py-8 text-center text-gray-500 italic">
-                                No posts found yet. Create and publish a post to view individual analytics.
-                            </td>
-                        </tr>
-                    {% endif %}
+                <tbody class="divide-y divide-gray-800/60">
+                    {% for p in posts %}
+                    <tr class="hover:bg-gray-950/50 transition">
+                        <td class="py-4 px-4 font-medium text-white max-w-xs truncate">{{ p.content }}</td>
+                        <td class="py-4 px-4 text-gray-300 font-semibold">{{ p.platforms }}</td>
+                        <td class="py-4 px-4">
+                            {% if p.status == 'published' %}
+                            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase">Published</span>
+                            {% else %}
+                            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 uppercase">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-4 px-4 text-gray-400 font-mono text-[11px]">{{ p.scheduled_at.strftime('%b %d, %Y %H:%M') if p.scheduled_at else 'N/A' }}</td>
+                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>
+        {% else %}
+        <div class="text-center py-12 text-gray-500 text-xs">
+            No posts found yet. Create and publish a post to view individual analytics.
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
