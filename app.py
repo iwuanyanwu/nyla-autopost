@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
-from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required
+import uuid
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
@@ -15,7 +17,6 @@ class SimpleUser(UserMixin):
 def load_user(user_id):
     return SimpleUser(user_id)
 
-# Global in-memory storage for posts
 POSTS_DB = []
 
 @app.route('/')
@@ -25,31 +26,29 @@ def index():
 @app.route('/dashboard')
 @login_required
 def dashboard():
+    published_count = sum(1 for p in POSTS_DB if p['status'] == 'published')
+    scheduled_count = sum(1 for p in POSTS_DB if p['status'] == 'pending')
+    
+    display_posts = []
+    for p in POSTS_DB:
+        p_copy = p.copy()
+        dt = p_copy.get('scheduled_at')
+        if dt:
+            if isinstance(dt, str):
+                try:
+                    dt = datetime.fromisoformat(dt)
+                except ValueError:
+                    pass
+            if hasattr(dt, '__add__'):
+                p_copy['scheduled_at'] = dt + timedelta(minutes=60)
+        display_posts.append(p_copy)
+    
     return render_template(
         'dashboard.html', 
         total_posts=len(POSTS_DB), 
-        published=len(POSTS_DB), 
-        scheduled=0, 
-        ig_count=0, 
-        x_count=0, 
-        li_count=0, 
-        fb_count=0, 
-        posts=POSTS_DB
-    )
-
-@app.route('/analytics')
-@login_required
-def analytics():
-    return render_template(
-        'analytics.html', 
-        total_posts=len(POSTS_DB), 
-        published=len(POSTS_DB), 
-        scheduled=0, 
-        ig_count=0, 
-        x_count=0, 
-        li_count=0, 
-        fb_count=0, 
-        posts=POSTS_DB
+        published=published_count, 
+        scheduled=scheduled_count, 
+        recent_posts=display_posts
     )
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -59,14 +58,6 @@ def login():
         login_user(user)
         return redirect(url_for('dashboard'))
     return render_template('login.html')
-
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        user = SimpleUser(1)
-        login_user(user)
-        return redirect(url_for('dashboard'))
-    return render_template('register.html')
 
 @app.route('/logout')
 @login_required
@@ -78,11 +69,83 @@ def logout():
 @login_required
 def compose():
     if request.method == 'POST':
-        message = request.form.get('message', '')
-        if message:
-            POSTS_DB.append({'message': message})
+        post_text = request.form.get('content', '')
+        selected_platforms = request.form.getlist('platforms')
+        platform_string = ', '.join(selected_platforms) if selected_platforms else 'Unspecified Network'
+        
+        post_type = request.form.get('post_type', 'now')
+        scheduled_time_str = request.form.get('scheduled_at_local', '')
+        
+        post_status = 'published'
+        post_time = datetime.now()
+        
+        if post_type == 'schedule' and scheduled_time_str:
+            try:
+                post_time = datetime.fromisoformat(scheduled_time_str)
+                post_status = 'pending'
+            except ValueError:
+                pass
+        
+        if post_text:
+            new_post = {
+                'id': str(uuid.uuid4()),
+                'content': post_text,
+                'image_paths': '',
+                'scheduled_at': post_time, 
+                'platforms': platform_string, 
+                'status': post_status
+            }
+            POSTS_DB.insert(0, new_post)
         return redirect(url_for('dashboard'))
     return render_template('compose.html')
+
+@app.route('/edit_post/<post_id>', methods=['GET', 'POST'])
+@login_required
+def edit_post(post_id):
+    post_to_edit = None
+    for p in POSTS_DB:
+        if p['id'] == post_id:
+            post_to_edit = p
+            break
+            
+    if not post_to_edit:
+        return redirect(url_for('dashboard'))
+        
+    if request.method == 'POST':
+        post_text = request.form.get('content', '')
+        selected_platforms = request.form.getlist('platforms')
+        platform_string = ', '.join(selected_platforms) if selected_platforms else 'Unspecified Network'
+        
+        scheduled_time_str = request.form.get('scheduled_at', '')
+        
+        post_time = post_to_edit['scheduled_at']
+        if scheduled_time_str:
+            try:
+                post_time = datetime.fromisoformat(scheduled_time_str)
+            except ValueError:
+                pass
+                
+        if post_text:
+            post_to_edit['content'] = post_text
+            post_to_edit['platforms'] = platform_string
+            post_to_edit['scheduled_at'] = post_time
+            post_to_edit['status'] = 'pending'
+            
+        return redirect(url_for('dashboard'))
+        
+    return render_template('edit_post.html', post=post_to_edit)
+
+@app.route('/delete_post/<post_id>', methods=['POST'])
+@login_required
+def delete_post(post_id):
+    global POSTS_DB
+    POSTS_DB = [p for p in POSTS_DB if p['id'] != post_id]
+    return redirect(url_for('dashboard'))
+
+@app.route('/analytics')
+@login_required
+def analytics():
+    return render_template('analytics.html')
 
 @app.route('/settings')
 @login_required

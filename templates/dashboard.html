@@ -1,7 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Dashboard - Nyla AutoPost
-
-
+{% block title %}Dashboard – Nyla AutoPost{% endblock %}
 
 {% block content %}
 <div class="space-y-8">
@@ -10,9 +8,11 @@
             <h1 class="text-2xl md:text-3xl font-extrabold text-white">Welcome Back 👋</h1>
             <p class="text-gray-400 text-sm mt-1">Manage and track your multi-channel posts effortlessly.</p>
         </div>
-        <a href="{{ url_for('compose') }}" class="bg-gradient-to-r from-blue-600 via-indigo-600 to-pink-600 hover:opacity-90 text-white font-bold px-6 py-3 rounded-2xl transition shadow-lg shadow-blue-600/20 flex items-center gap-2">
-            <i class="fa-solid fa-plus"></i> New Post
-        </a>
+        <div>
+            <a href="{{ url_for('compose') }}" class="bg-gradient-to-r from-blue-600 via-indigo-600 to-pink-600 hover:opacity-90 text-white font-bold px-6 py-3 rounded-2xl transition shadow-lg shadow-blue-600/20 flex items-center gap-2">
+                <i class="fa-solid fa-plus"></i> New Post
+            </a>
+        </div>
     </div>
 
     <!-- STATS -->
@@ -37,7 +37,7 @@
         {% if recent_posts %}
         <div class="space-y-3">
             {% for post in recent_posts %}
-            <div class="bg-gray-950/70 p-4 rounded-2xl border border-gray-800/80 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div class="bg-gray-950/70 p-4 rounded-2xl border border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div class="flex items-start gap-3">
                     {% if post.image_paths %}
                         {% set img = post.image_paths.split(',')[0] %}
@@ -57,19 +57,19 @@
                         <span class="bg-emerald-500/10 text-emerald-400 text-xs px-3 py-1.5 rounded-xl font-bold border border-emerald-500/20">Published</span>
                     {% else %}
                         <span class="bg-amber-500/10 text-amber-400 text-xs px-3 py-1.5 rounded-xl font-bold border border-amber-500/20">Pending</span>
-                        
-                        <!-- EDIT BUTTON -->
-                        <a href="{{ url_for('compose') }}" class="bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white text-xs px-3 py-1.5 rounded-xl font-bold border border-blue-500/30 transition">
-                            <i class="fa-solid fa-pen"></i> Edit
-                        </a>
-                        
-                        <!-- DELETE BUTTON -->
-                        <form action="{{ url_for('delete_post', post_id=post.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to cancel and delete this scheduled post?')">
-                            <button type="submit" class="bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white text-xs px-3 py-1.5 rounded-xl font-bold border border-red-500/30 transition">
-                                <i class="fa-solid fa-trash"></i> Delete
-                            </button>
-                        </form>
                     {% endif %}
+
+                    <!-- EDIT BUTTON -->
+                    <a href="{{ url_for('edit_post', post_id=post.id) }}" class="bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white text-xs px-3 py-1.5 font-bold rounded-xl border border-blue-500/30 transition">
+                        <i class="fa-solid fa-pen"></i> Edit
+                    </a>
+
+                    <!-- DELETE BUTTON -->
+                    <form action="{{ url_for('delete_post', post_id=post.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to cancel and delete this scheduled post?')">
+                        <button type="submit" class="bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white text-xs px-3 py-1.5 font-bold rounded-xl border border-red-500/30 transition">
+                            <i class="fa-solid fa-trash"></i> Delete
+                        </button>
+                    </form>
                 </div>
             </div>
             {% endfor %}
@@ -79,5 +79,4 @@
         {% endif %}
     </div>
 </div>
-{% endblock %}
 {% endblock %}
