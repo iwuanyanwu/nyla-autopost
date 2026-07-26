@@ -26,6 +26,18 @@ def index():
 @app.route('/dashboard')
 @login_required
 def dashboard():
+    current_time = datetime.now()
+    for p in POSTS_DB:
+        if p.get('status') == 'pending' and p.get('scheduled_at'):
+            dt = p['scheduled_at']
+            if isinstance(dt, str):
+                try:
+                    dt = datetime.fromisoformat(dt)
+                except ValueError:
+                    pass
+            if isinstance(dt, datetime) and dt <= current_time:
+                p['status'] = 'published'
+
     published_count = sum(1 for p in POSTS_DB if p['status'] == 'published')
     scheduled_count = sum(1 for p in POSTS_DB if p['status'] == 'pending')
     
