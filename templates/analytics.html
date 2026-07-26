@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Analytics – Nyla AutoPost{% endblock %}
+{% block title %}Analytics - Nyla AutoPost{% endblock %}
 
 {% block content %}
 <div class="space-y-8">
@@ -79,7 +79,7 @@
         <h2 class="text-lg font-bold text-white flex items-center gap-2">
             <i class="fa-solid fa-table-list text-blue-400"></i> Individual Post Performance
         </h2>
-        
+
         {% if posts %}
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
@@ -88,6 +88,8 @@
                         <th class="pb-3 px-4">Content Preview</th>
                         <th class="pb-3 px-4">Platform(s)</th>
                         <th class="pb-3 px-4">Status</th>
+                        <th class="pb-3 px-4">Likes</th>
+                        <th class="pb-3 px-4">Comments</th>
                         <th class="pb-3 px-4">Scheduled / Date</th>
                     </tr>
                 </thead>
@@ -103,6 +105,8 @@
                             <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 uppercase">Pending</span>
                             {% endif %}
                         </td>
+                        <td class="py-4 px-4 text-white font-semibold">{{ p.likes }}</td>
+                        <td class="py-4 px-4 text-white font-semibold">{{ p.comments }}</td>
                         <td class="py-4 px-4 text-gray-400 font-mono text-[11px]">{{ p.scheduled_at.strftime('%b %d, %Y %H:%M') if p.scheduled_at else 'N/A' }}</td>
                     </tr>
                     {% endfor %}
