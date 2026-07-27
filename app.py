@@ -1,3 +1,4 @@
+from ai_writer_module import register_ai_writer_routes
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required
 import uuid
@@ -227,6 +228,8 @@ def live_demo():
 def ai_writer():
     return render_template('ai_writer.html')
 
+register_ai_writer_routes(app)
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
 
@@ -251,6 +254,8 @@ def live_demo():
         ]
     }
     return render_template('demo.html', stats=mock_stats)
+
+register_ai_writer_routes(app)
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)

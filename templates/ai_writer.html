@@ -1,76 +1,232 @@
-{% extends "base.html" %}
-{% block title %}AI Writer — Nyla AutoPost{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Content Studio — Nyla AutoPost</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        darkBg: '#090d16',
+        cardBg: '#111827',
+        cardBorder: '#1f2937',
+        brandPurple: '#7c3aed',
+        brandIndigo: '#6366f1'
+      }
+    }
+  }
+}
+</script>
+<style>
+body { font-family: 'Inter', sans-serif; background-color: #090d16; color: #f3f4f6; }
+.brand-gradient { background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%); }
+.brand-text-gradient { background: linear-gradient(135deg, #a78bfa 0%, #818cf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.custom-card { background-color: #111827; border: 1px solid #1f2937; }
+.platform-tab.active { background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%); color: white; border-color: transparent; }
+.tone-btn.active { background-color: rgba(124, 58, 237, 0.15); border-color: #7c3aed; color: #a78bfa; }
+</style>
+</head>
+<body class="min-h-screen antialiased flex flex-col justify-between">
 
-{% block content %}
-<div class="max-w-4xl mx-auto space-y-6 py-4 px-2 sm:px-4 relative pb-12">
-
-    <!-- Ambient Glow -->
-    <div class="absolute -top-10 left-1/2 -translate-x-1/2 w-[80%] h-[250px] bg-gradient-to-tr from-purple-600/20 via-blue-600/15 to-indigo-600/20 blur-[100px] rounded-full pointer-events-none -z-10"></div>
-
-    <!-- Header Section -->
-    <div class="bg-gray-900/90 p-6 rounded-3xl border border-gray-800 shadow-2xl backdrop-blur-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-            <div class="inline-flex items-center gap-2 bg-purple-500/10 border border-purple-500/20 px-3 py-1 rounded-full text-xs font-bold text-purple-400 mb-2">
-                <i class="fa-solid fa-wand-magic-sparkles"></i> Neural Generation Engine
-            </div>
-            <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">AI Content Studio</h1>
-            <p class="text-xs sm:text-sm text-gray-400">Generate high-converting multi-channel copy instantly using AI.</p>
-        </div>
-        <a href="/dashboard" class="inline-flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-white font-bold text-xs uppercase tracking-wider px-4 py-2.5 rounded-xl transition">
-            <i class="fa-solid fa-arrow-left"></i> Dashboard
-        </a>
+<!-- Top Navigation -->
+<nav class="border-b border-gray-800 bg-[#090d16]/80 backdrop-blur-md sticky top-0 z-50">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl brand-gradient flex items-center justify-center shadow-lg shadow-purple-500/20">
+        <span class="text-white font-bold text-base">N</span>
+      </div>
+      <span class="font-bold text-base tracking-tight text-white">Nyla <span class="brand-text-gradient">AutoPost</span></span>
     </div>
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+        <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+        <span class="text-xs font-medium text-emerald-400">AI Engine Online</span>
+      </div>
+      <a href="/dashboard" class="px-3.5 py-1.5 rounded-xl bg-gray-800/60 border border-gray-700/60 text-xs font-medium text-gray-300 hover:bg-gray-800 hover:text-white transition-all flex items-center gap-2">
+        <i class="fas fa-arrow-left text-[10px]"></i> Dashboard
+      </a>
+    </div>
+  </div>
+</nav>
 
-    <!-- AI Generator Interface -->
-    <div class="bg-gray-900/80 p-6 rounded-3xl border border-gray-800 shadow-2xl space-y-6">
+<!-- Main Container -->
+<main class="max-w-6xl mx-auto px-4 sm:px-6 py-10 w-full flex-grow">
+  <div class="mb-8">
+    <h1 class="text-3xl font-extrabold text-white tracking-tight mb-2">AI Content <span class="brand-text-gradient">Studio</span></h1>
+    <p class="text-gray-400 text-sm">Create, adapt, and cross-post high-performing social copy instantly using your integrated generation pipeline.</p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <!-- Controls Column -->
+    <div class="lg:col-span-5 space-y-6">
+      
+      <!-- Prompt Card -->
+      <div class="custom-card rounded-2xl p-5 space-y-4 shadow-xl">
+        <div class="flex items-center justify-between">
+          <label class="text-xs font-bold uppercase tracking-wider text-gray-300">Prompt / Topic</label>
+          <span id="promptCharCount" class="text-xs font-mono text-gray-500">0 chars</span>
+        </div>
+        <textarea id="promptInput" rows="4" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-3.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 transition-all resize-none" placeholder="What would you like to build copy for today?"></textarea>
         
-        <!-- Prompt Form -->
-        <form action="/ai-writer" method="POST" class="space-y-4">
-            <div class="space-y-2">
-                <label class="text-xs font-bold text-gray-300 uppercase tracking-wider block">What would you like to post about?</label>
-                <textarea name="prompt" rows="3" placeholder="e.g., Announcing our new B2B sourcing capabilities for electronic components..." class="w-full bg-gray-950/80 border border-gray-800 rounded-2xl p-4 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-purple-500 transition shadow-inner"></textarea>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-gray-300 uppercase tracking-wider block">Tone of Voice</label>
-                    <select name="tone" class="w-full bg-gray-950/80 border border-gray-800 rounded-xl p-3 text-xs text-gray-200 focus:outline-none focus:border-purple-500 transition">
-                        <option value="professional">Professional & Corporate</option>
-                        <option value="casual">Casual & Engaging</option>
-                        <option value="bold">Bold & Direct</option>
-                        <option value="promotional">Promotional & Urgent</option>
-                    </select>
-                </div>
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-gray-300 uppercase tracking-wider block">Target Platform</label>
-                    <select name="platform" class="w-full bg-gray-950/80 border border-gray-800 rounded-xl p-3 text-xs text-gray-200 focus:outline-none focus:border-purple-500 transition">
-                        <option value="all">All Connected Channels (Cross-Post)</option>
-                        <option value="twitter">X / Twitter (Short & Punchy)</option>
-                        <option value="linkedin">LinkedIn (Thought Leadership)</option>
-                        <option value="instagram">Instagram (Visual Caption)</option>
-                    </select>
-                </div>
-            </div>
-
-            <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs uppercase tracking-wider rounded-2xl shadow-lg shadow-purple-600/20 transition active:scale-[0.99] flex items-center justify-center gap-2">
-                <i class="fa-solid fa-sparkles"></i> Generate AI Copy
-            </button>
-        </form>
-
-        <!-- Output Preview Box (Conditional or Interactive State) -->
-        <div class="pt-4 border-t border-gray-800 space-y-3">
-            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Generated Output Preview</h3>
-            
-            <div class="p-4 bg-gray-950/70 border border-gray-800 rounded-2xl space-y-3 text-sm text-gray-300">
-                <div class="flex items-center justify-between text-xs text-gray-500">
-                    <span class="font-mono text-purple-400">Awaiting prompt input...</span>
-                    <span>0 characters</span>
-                </div>
-                <p class="text-xs text-gray-400 italic">Your generated multi-channel social copy will appear here ready for execution.</p>
-            </div>
+        <!-- Quick Starters -->
+        <div>
+          <span class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider block mb-2">Quick Starters</span>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="setPrompt('Announcing our new industrial-grade components line designed for high-efficiency global supply chains.')" class="px-2.5 py-1 rounded-lg bg-gray-800/80 border border-gray-700/50 text-xs text-gray-300 hover:border-purple-500/50 hover:text-purple-300 transition-all">🚀 Product Launch</button>
+            <button onclick="setPrompt('Sharing major efficiency updates across our core cross-border trade operations.')" class="px-2.5 py-1 rounded-lg bg-gray-800/80 border border-gray-700/50 text-xs text-gray-300 hover:border-purple-500/50 hover:text-purple-300 transition-all">📊 Operational Update</button>
+          </div>
         </div>
+      </div>
+
+      <!-- Config Card -->
+      <div class="custom-card rounded-2xl p-5 space-y-4 shadow-xl">
+        <label class="text-xs font-bold uppercase tracking-wider text-gray-300 block">Configuration</label>
+        
+        <!-- Tone Selector -->
+        <div>
+          <span class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider block mb-2">Tone Profile</span>
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="selectTone('professional')" data-tone="professional" class="tone-btn active p-2.5 rounded-xl border border-purple-500/40 bg-purple-500/10 text-xs font-medium text-purple-300 text-left transition-all"><i class="fas fa-briefcase mr-1.5"></i>Professional</button>
+            <button onclick="selectTone('casual')" data-tone="casual" class="tone-btn p-2.5 rounded-xl border border-gray-800 bg-gray-900 text-xs font-medium text-gray-400 text-left hover:border-gray-700 transition-all"><i class="fas fa-comment mr-1.5"></i>Casual</button>
+            <button onclick="selectTone('bold')" data-tone="bold" class="tone-btn p-2.5 rounded-xl border border-gray-800 bg-gray-900 text-xs font-medium text-gray-400 text-left hover:border-gray-700 transition-all"><i class="fas fa-bolt mr-1.5"></i>Bold</button>
+            <button onclick="selectTone('promotional')" data-tone="promotional" class="tone-btn p-2.5 rounded-xl border border-gray-800 bg-gray-900 text-xs font-medium text-gray-400 text-left hover:border-gray-700 transition-all"><i class="fas fa-bullhorn mr-1.5"></i>Promotional</button>
+          </div>
+        </div>
+
+        <!-- Target Platform -->
+        <div>
+          <span class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider block mb-2">Target Channel</span>
+          <select id="platformSelect" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-3 py-2.5 text-xs text-gray-200 focus:outline-none focus:border-purple-500 transition-all">
+            <option value="all">All Connected Channels (Cross-Post)</option>
+            <option value="twitter">X / Twitter</option>
+            <option value="linkedin">LinkedIn</option>
+            <option value="instagram">Instagram</option>
+            <option value="facebook">Facebook</option>
+            <option value="tiktok">TikTok</option>
+          </select>
+        </div>
+
+        <!-- Submit Button -->
+        <button id="generateBtn" onclick="generateContent()" class="w-full py-3 rounded-xl brand-gradient text-white text-xs font-bold uppercase tracking-wider shadow-lg shadow-purple-600/30 hover:opacity-95 transition-all flex items-center justify-center gap-2">
+          <i class="fas fa-sparkles"></i> Synthesize Copy
+        </button>
+      </div>
 
     </div>
 
-</div>
-{% endblock %}
+    <!-- Output Column -->
+    <div class="lg:col-span-7 space-y-6">
+      
+      <!-- Initial Empty State -->
+      <div id="emptyState" class="custom-card rounded-2xl p-12 flex flex-col items-center justify-center text-center min-h-[420px]">
+        <div class="w-14 h-14 rounded-2xl bg-gray-900 border border-gray-800 flex items-center justify-center mb-4 text-gray-600">
+          <i class="fas fa-wand-magic-sparkles text-xl"></i>
+        </div>
+        <h3 class="text-sm font-bold text-gray-300 uppercase tracking-wider mb-1">Studio Awaiting Input</h3>
+        <p class="text-xs text-gray-500 max-w-xs">Configure your specifications on the left and run generation to view synthesized copy channels.</p>
+      </div>
+
+      <!-- Loading State -->
+      <div id="loadingState" class="custom-card rounded-2xl p-12 flex flex-col items-center justify-center text-center min-h-[420px] hidden">
+        <div class="w-10 h-10 border-2 border-purple-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+        <h3 class="text-sm font-bold text-gray-200 uppercase tracking-wider">Synthesizing Content...</h3>
+      </div>
+
+      <!-- Results Container -->
+      <div id="resultsContainer" class="hidden space-y-4">
+        <div class="flex gap-2 overflow-x-auto pb-1" id="platformTabs"></div>
+        <div class="custom-card rounded-2xl p-6 space-y-4 shadow-xl">
+          <div id="activePreview" class="text-sm text-gray-200 leading-relaxed whitespace-pre-line min-h-[220px]"></div>
+          <div class="pt-4 border-t border-gray-800 flex items-center justify-between">
+            <span id="charCounterBadge" class="text-xs font-mono text-gray-500">0 / 0 chars</span>
+            <button onclick="copyContent()" class="px-4 py-2 rounded-xl bg-gray-800 border border-gray-700 text-xs font-semibold text-gray-200 hover:bg-gray-700 transition-all flex items-center gap-2">
+              <i class="fas fa-copy"></i> Copy Text
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<script>
+let currentTone = 'professional', generatedData = null, activePlatform = null;
+const promptInput = document.getElementById('promptInput'), promptCharCount = document.getElementById('promptCharCount');
+promptInput.addEventListener('input', () => { promptCharCount.textContent = promptInput.value.length + ' chars'; });
+
+function setPrompt(text) { promptInput.value = text; promptCharCount.textContent = text.length + ' chars'; promptInput.focus(); }
+function selectTone(tone) {
+  currentTone = tone;
+  document.querySelectorAll('.tone-btn').forEach(btn => {
+    if(btn.dataset.tone === tone) {
+      btn.classList.add('active', 'border-purple-500/40', 'bg-purple-500/10', 'text-purple-300');
+      btn.classList.remove('border-gray-800', 'bg-gray-900', 'text-gray-400');
+    } else {
+      btn.classList.remove('active', 'border-purple-500/40', 'bg-purple-500/10', 'text-purple-300');
+      btn.classList.add('border-gray-800', 'bg-gray-900', 'text-gray-400');
+    }
+  });
+}
+
+async function generateContent() {
+  const prompt = promptInput.value.trim();
+  if(!prompt) return;
+  document.getElementById('emptyState').classList.add('hidden');
+  document.getElementById('resultsContainer').classList.add('hidden');
+  document.getElementById('loadingState').classList.remove('hidden');
+
+  try {
+    const res = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: prompt, tone: currentTone, platform: document.getElementById('platformSelect').value })
+    });
+    const data = await res.json();
+    generatedData = data;
+    
+    document.getElementById('loadingState').classList.add('hidden');
+    document.getElementById('resultsContainer').classList.remove('hidden');
+    renderResults(data);
+  } catch(err) { console.error(err); }
+}
+
+function renderResults(data) {
+  const platforms = data.platforms, keys = Object.keys(platforms);
+  activePlatform = keys[0];
+  document.getElementById('platformTabs').innerHTML = keys.map((k, i) => `
+    <button onclick="switchPlatform('${k}')" data-platform="${k}" class="platform-tab ${i===0?'active':''} px-4 py-2 rounded-xl text-xs font-semibold bg-gray-900 border border-gray-800 text-gray-400 transition-all">
+      ${platforms[k].platform_name}
+    </button>
+  `).join('');
+  renderPreview(activePlatform);
+}
+
+function renderPreview(key) {
+  const plat = generatedData.platforms[key];
+  document.getElementById('activePreview').textContent = plat.text;
+  document.getElementById('charCounterBadge.textContent').textContent = plat.char_count + ' / ' + plat.char_limit + ' chars';
+}
+
+function switchPlatform(key) {
+  activePlatform = key;
+  document.querySelectorAll('.platform-tab').forEach(b => {
+    if(b.dataset.platform === key) b.classList.add('active');
+    else b.classList.remove('active');
+  });
+  renderPreview(key);
+}
+
+function copyContent() {
+  if(!generatedData || !activePlatform) return;
+  navigator.clipboard.writeText(generatedData.platforms[activePlatform].text);
+  alert('Copied output to clipboard!');
+}
+</script>
+</body>
+</html>
