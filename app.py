@@ -230,6 +230,38 @@ def ai_writer():
 
 register_ai_writer_routes(app)
 
+
+@app.route('/content')
+def hub_content_manager():
+    all_posts = list(POSTS_DB)
+    all_posts.reverse()
+    published = [p for p in all_posts if p.get('status') == 'published']
+    scheduled = [p for p in all_posts if p.get('status') == 'pending']
+    return render_template('content.html', all_posts=all_posts, published_posts=published, scheduled_posts=scheduled)
+
+@app.route('/api/hub/delete-post/<int:post_id>', methods=['POST'])
+def hub_delete_post(post_id):
+    global POSTS_DB
+    POSTS_DB = [p for p in POSTS_DB if not (p.get('id') == post_id and p.get('status') != 'published')]
+    return jsonify({'success': True})
+
+
+@app.route('/api/hub/edit-post/<int:post_id>', methods=['POST'])
+def hub_edit_post(post_id):
+    data = request.get_json()
+    for p in POSTS_DB:
+        if p.get('id') == post_id:
+            if p.get('status') == 'published': 
+                return jsonify({'success': False, 'error': 'Cannot edit published posts'}), 400
+            
+            if data.get('content'):
+                p['content'] = data.get('content')
+                p['text'] = data.get('content')
+            if data.get('scheduled_at'):
+                p['scheduled_at'] = data.get('scheduled_at')
+            return jsonify({'success': True})
+    return jsonify({'success': False}), 404
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
 

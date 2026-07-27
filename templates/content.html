@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nyla AutoPost - Content Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-[#0b0f17] text-gray-100 min-h-screen pb-24 p-4 sm:p-6">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-2xl font-bold tracking-tight text-white flex items-center gap-2 mb-6">
+            <i class="fa-solid fa-folder-open text-purple-400"></i> Content Manager
+        </h1>
+        
+        <div class="space-y-4">
+            <h2 class="text-sm font-bold text-gray-400 uppercase tracking-wider">Scheduled Queue</h2>
+            {% for post in scheduled_posts %}
+            <div class="bg-[#10121a] border border-gray-800 rounded-xl p-4 flex justify-between items-center">
+                <div class="flex-1 pr-4">
+                    <p class="text-sm text-gray-200 mb-2">{{ post.get('content', post.get('text', '')) }}</p>
+                    <div class="flex items-center gap-3 text-xs">
+                        <span class="text-amber-400"><i class="fa-regular fa-clock mr-1"></i>{{ post.get('scheduled_at') }}</span>
+                        <div class="flex gap-1.5 text-gray-400">
+                            {% if post.get('platforms') %}
+                                {% if 'x' in post.platforms %}<i class="fa-brands fa-x-twitter hover:text-white"></i>{% endif %}
+                                {% if 'facebook' in post.platforms %}<i class="fa-brands fa-facebook hover:text-blue-500"></i>{% endif %}
+                                {% if 'linkedin' in post.platforms %}<i class="fa-brands fa-linkedin hover:text-blue-400"></i>{% endif %}
+                                {% if 'instagram' in post.platforms %}<i class="fa-brands fa-instagram hover:text-pink-500"></i>{% endif %}
+                            {% endif %}
+                            {% if post.get('has_media') %}<i class="fa-solid fa-image text-blue-400 ml-1" title="Media Attached"></i>{% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button 
+                        data-id="{{ post.get('id') }}" 
+                        data-content="{{ post.get('content', post.get('text', '')) }}" 
+                        data-date="{{ post.get('scheduled_at') }}" 
+                        data-platforms='{{ post.get("platforms", []) | tojson | safe }}'
+                        data-premium="{{ 'true' if post.get('x_premium') else 'false' }}"
+                        data-media="{{ 'true' if post.get('has_media') else 'false' }}"
+                        onclick="openEditModal(this)" 
+                        class="px-3 py-1.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs rounded-lg transition hover:bg-blue-500/20">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <button onclick="deletePost('{{ post.get('id') }}')" class="px-3 py-1.5 bg-red-500/10 text-red-400 border border-red-500/20 text-xs rounded-lg transition hover:bg-red-500/20"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            </div>
+            {% else %}
+            <p class="text-xs text-gray-600">No upcoming posts.</p>
+            {% endfor %}
+
+            <h2 class="text-sm font-bold text-gray-400 uppercase tracking-wider mt-8">Published History</h2>
+            {% for post in published_posts %}
+            <div class="bg-[#10121a] border border-gray-800 rounded-xl p-4">
+                <p class="text-sm text-gray-200 mb-2">{{ post.get('content', post.get('text', '')) }}</p>
+                <div class="flex items-center gap-3">
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 inline-block">PUBLISHED</span>
+                    <div class="flex gap-2 text-gray-400 text-sm">
+                        {% if post.get('platforms') %}
+                            {% if 'x' in post.platforms %}<i class="fa-brands fa-x-twitter"></i>{% endif %}
+                            {% if 'facebook' in post.platforms %}<i class="fa-brands fa-facebook"></i>{% endif %}
+                            {% if 'linkedin' in post.platforms %}<i class="fa-brands fa-linkedin"></i>{% endif %}
+                            {% if 'instagram' in post.platforms %}<i class="fa-brands fa-instagram"></i>{% endif %}
+                        {% else %}
+                            <i class="fa-solid fa-globe"></i>
+                        {% endif %}
+                        {% if post.get('has_media') %}<i class="fa-solid fa-image text-blue-400 ml-1"></i>{% endif %}
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <p class="text-xs text-gray-600">No published posts yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Advanced Edit Modal -->
+    <div id="editModal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-[#10121a] border border-gray-800 rounded-xl p-5 w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
+            <h3 class="text-white font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-pen text-blue-400"></i> Edit Scheduled Post</h3>
+            <input type="hidden" id="editPostId">
+            
+            <!-- Platform Selection -->
+            <label class="block text-xs text-gray-400 mb-2">Target Platforms</label>
+            <div class="flex gap-3 mb-4">
+                <label class="flex items-center gap-1.5 cursor-pointer text-sm text-gray-300 hover:text-white">
+                    <input type="checkbox" value="x" class="platform-checkbox rounded border-gray-600 bg-[#0b0f17] text-purple-500" onchange="evaluateRules()">
+                    <i class="fa-brands fa-x-twitter"></i> X
+                </label>
+                <label class="flex items-center gap-1.5 cursor-pointer text-sm text-gray-300 hover:text-white">
+                    <input type="checkbox" value="facebook" class="platform-checkbox rounded border-gray-600 bg-[#0b0f17] text-purple-500" onchange="evaluateRules()">
+                    <i class="fa-brands fa-facebook"></i> FB
+                </label>
+                <label class="flex items-center gap-1.5 cursor-pointer text-sm text-gray-300 hover:text-white">
+                    <input type="checkbox" value="linkedin" class="platform-checkbox rounded border-gray-600 bg-[#0b0f17] text-purple-500" onchange="evaluateRules()">
+                    <i class="fa-brands fa-linkedin"></i> LI
+                </label>
+                <label class="flex items-center gap-1.5 cursor-pointer text-sm text-gray-300 hover:text-white">
+                    <input type="checkbox" value="instagram" class="platform-checkbox rounded border-gray-600 bg-[#0b0f17] text-purple-500" onchange="evaluateRules()">
+                    <i class="fa-brands fa-instagram"></i> IG
+                </label>
+            </div>
+
+            <!-- X Premium Toggle -->
+            <div id="xPremiumContainer" class="hidden mb-4 p-3 rounded-lg bg-blue-900/10 border border-blue-500/20 flex items-center justify-between">
+                <div class="flex items-center gap-2 text-sm text-blue-300">
+                    <i class="fa-solid fa-certificate"></i> X Premium User
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="xPremiumToggle" class="sr-only peer" onchange="evaluateRules()">
+                    <div class="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-500"></div>
+                </label>
+            </div>
+
+            <div class="flex justify-between items-end mb-1">
+                <label class="block text-xs text-gray-400">Post Content</label>
+                <span id="charCount" class="text-xs font-mono text-gray-500">0 / 280</span>
+            </div>
+            <textarea id="editContent" oninput="evaluateRules()" class="w-full bg-[#0b0f17] border border-gray-700 text-gray-200 rounded-lg p-3 text-sm mb-4 focus:outline-none focus:border-purple-500" rows="5"></textarea>
+            
+            <div class="flex gap-4 mb-6">
+                <div class="flex-1">
+                    <label class="block text-xs text-gray-400 mb-1">Scheduled Time</label>
+                    <input type="datetime-local" id="editDate" class="w-full bg-[#0b0f17] border border-gray-700 text-gray-200 rounded-lg p-2.5 text-sm focus:outline-none focus:border-purple-500">
+                </div>
+                <div class="flex items-end pb-1">
+                    <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-300 hover:text-white bg-[#0b0f17] border border-gray-700 p-2.5 rounded-lg transition hover:border-blue-500">
+                        <input type="checkbox" id="hasMediaToggle" class="hidden" onchange="evaluateRules()">
+                        <i class="fa-solid fa-image text-blue-400" id="mediaIcon"></i> <span id="mediaText">Add Media</span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Warning Banner for IG -->
+            <div id="igWarning" class="hidden mb-4 p-2.5 rounded-lg bg-pink-900/10 border border-pink-500/20 text-xs text-pink-300 flex items-center gap-2">
+                <i class="fa-solid fa-circle-exclamation"></i> Instagram requires media to be attached.
+            </div>
+            
+            <div class="flex justify-end gap-3">
+                <button onclick="closeEditModal()" class="px-4 py-2 text-sm text-gray-400 hover:text-white transition">Cancel</button>
+                <button id="saveBtn" onclick="saveEdit()" class="px-4 py-2 text-sm bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition font-medium">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Standard Footer -->
+    <div class="fixed bottom-0 left-0 right-0 bg-[#0b0f17]/95 backdrop-blur-md border-t border-gray-800/80 py-2.5 px-4 flex justify-around items-center text-[11px] text-gray-400 z-40">
+        <a href="/dashboard" class="flex flex-col items-center hover:text-gray-200"><i class="fa-solid fa-chart-pie text-sm mb-0.5"></i> Dashboard</a>
+        <a href="/compose" class="flex flex-col items-center hover:text-gray-200"><i class="fa-solid fa-pen-nib text-sm mb-0.5"></i> Compose</a>
+        <a href="/content" class="flex flex-col items-center text-purple-400 font-medium"><i class="fa-solid fa-folder-open text-sm mb-0.5"></i> Content</a>
+        <a href="/analytics" class="flex flex-col items-center hover:text-gray-200"><i class="fa-solid fa-chart-line text-sm mb-0.5"></i> Analytics</a>
+        <a href="/settings" class="flex flex-col items-center hover:text-gray-200"><i class="fa-solid fa-gear text-sm mb-0.5"></i> Settings</a>
+    </div>
+
+    <script>
+        const platformLimits = { x: 280, facebook: 63206, linkedin: 3000, instagram: 2200 };
+        const X_PREMIUM_LIMIT = 25000;
+
+        function openEditModal(btn) {
+            document.getElementById('editPostId').value = btn.getAttribute('data-id');
+            document.getElementById('editContent').value = btn.getAttribute('data-content');
+            
+            let dateStr = btn.getAttribute('data-date');
+            if(dateStr && dateStr.length >= 16) {
+                try { document.getElementById('editDate').value = dateStr.replace(' ', 'T').substring(0,16); } catch(e) {}
+            }
+
+            // Restore platform selections
+            document.querySelectorAll('.platform-checkbox').forEach(cb => cb.checked = false);
+            try {
+                const platforms = JSON.parse(btn.getAttribute('data-platforms') || '[]');
+                platforms.forEach(p => {
+                    const cb = document.querySelector(`.platform-checkbox[value="${p}"]`);
+                    if(cb) cb.checked = true;
+                });
+            } catch(e) {}
+
+            document.getElementById('xPremiumToggle').checked = btn.getAttribute('data-premium') === 'true';
+            document.getElementById('hasMediaToggle').checked = btn.getAttribute('data-media') === 'true';
+
+            document.getElementById('editModal').classList.remove('hidden');
+            evaluateRules();
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.add('hidden');
+        }
+
+        function evaluateRules() {
+            const content = document.getElementById('editContent').value;
+            const length = content.length;
+            const selected = Array.from(document.querySelectorAll('.platform-checkbox:checked')).map(cb => cb.value);
+            
+            const hasX = selected.includes('x');
+            const hasIG = selected.includes('instagram');
+            const isPremium = document.getElementById('xPremiumToggle').checked;
+            const hasMedia = document.getElementById('hasMediaToggle').checked;
+
+            // UI Toggles
+            document.getElementById('xPremiumContainer').style.display = hasX ? 'flex' : 'none';
+            document.getElementById('igWarning').style.display = (hasIG && !hasMedia) ? 'flex' : 'none';
+            
+            // Media Button Styling
+            const mediaIcon = document.getElementById('mediaIcon');
+            const mediaText = document.getElementById('mediaText');
+            if(hasMedia) {
+                mediaIcon.classList.replace('text-blue-400', 'text-emerald-400');
+                mediaText.innerText = "Media Attached";
+                mediaText.classList.add('text-emerald-400');
+            } else {
+                mediaIcon.classList.replace('text-emerald-400', 'text-blue-400');
+                mediaText.innerText = "Add Media";
+                mediaText.classList.remove('text-emerald-400');
+            }
+
+            // Calculate Max Chars
+            let maxChars = 63206; // Default to max possible if nothing selected
+            if (selected.length > 0) {
+                const limits = selected.map(p => {
+                    if (p === 'x') return isPremium ? X_PREMIUM_LIMIT : platformLimits.x;
+                    return platformLimits[p];
+                });
+                maxChars = Math.min(...limits);
+            }
+
+            // Update Counter UI
+            const counter = document.getElementById('charCount');
+            counter.innerText = `${length} / ${maxChars}`;
+            
+            const isValidLength = length > 0 && length <= maxChars;
+            const isValidIG = !hasIG || (hasIG && hasMedia);
+            const canSave = selected.length > 0 && isValidLength && isValidIG;
+
+            if (length > maxChars) {
+                counter.classList.add('text-red-500');
+                counter.classList.remove('text-gray-500');
+            } else {
+                counter.classList.remove('text-red-500');
+                counter.classList.add('text-gray-500');
+            }
+
+            document.getElementById('saveBtn').disabled = !canSave;
+            document.getElementById('saveBtn').className = canSave 
+                ? "px-4 py-2 text-sm bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition font-medium cursor-pointer"
+                : "px-4 py-2 text-sm bg-gray-600 text-gray-400 rounded-lg cursor-not-allowed opacity-50";
+        }
+
+        async function saveEdit() {
+            const id = document.getElementById('editPostId').value;
+            const content = document.getElementById('editContent').value;
+            const dateVal = document.getElementById('editDate').value;
+            
+            const platforms = Array.from(document.querySelectorAll('.platform-checkbox:checked')).map(cb => cb.value);
+            const isPremium = document.getElementById('xPremiumToggle').checked;
+            const hasMedia = document.getElementById('hasMediaToggle').checked;
+
+            const payload = { 
+                content: content,
+                platforms: platforms,
+                x_premium: isPremium,
+                has_media: hasMedia
+            };
+            
+            if(dateVal) {
+                payload.scheduled_at = dateVal.replace('T', ' ') + ':00';
+            }
+
+            const res = await fetch('/api/hub/edit-post/' + id, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            
+            if(res.ok) {
+                location.reload();
+            } else {
+                alert('Failed to save changes.');
+            }
+        }
+
+        async function deletePost(id) {
+            if(confirm('Delete this scheduled post?')) {
+                await fetch('/api/hub/delete-post/' + id, {method: 'POST'});
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>
