@@ -42,7 +42,7 @@
                     <span>Total Executions</span>
                     <i class="fa-solid fa-server text-purple-400 p-2 rounded-lg bg-purple-500/10 border border-purple-500/20"></i>
                 </div>
-                <div class="text-3xl font-extrabold text-white">0</div>
+                <div class="text-3xl font-extrabold text-white">{{ total_posts }}</div>
                 <div class="text-xs text-gray-500 mt-1">all-time posts</div>
             </div>
 
@@ -51,7 +51,7 @@
                     <span>Live & Delivered</span>
                     <i class="fa-solid fa-circle-check text-emerald-400 p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20"></i>
                 </div>
-                <div class="text-3xl font-extrabold text-emerald-400">0</div>
+                <div class="text-3xl font-extrabold text-emerald-400">{{ published }}</div>
                 <div class="text-xs text-gray-500 mt-1">published</div>
             </div>
 
@@ -60,7 +60,7 @@
                     <span>Scheduled Queue</span>
                     <i class="fa-solid fa-clock text-amber-400 p-2 rounded-lg bg-amber-500/10 border border-amber-500/20"></i>
                 </div>
-                <div class="text-3xl font-extrabold text-amber-400">0</div>
+                <div class="text-3xl font-extrabold text-amber-400">{{ scheduled }}</div>
                 <div class="text-xs text-gray-500 mt-1">pending dispatch</div>
             </div>
         </div>
@@ -86,7 +86,28 @@
             <div class="flex items-center gap-2 text-sm font-semibold text-gray-300">
                 <span class="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span> RECENT CONTENT STREAM
             </div>
-            <div class="p-12 rounded-xl border border-dashed border-gray-800 text-center flex flex-col items-center justify-center space-y-3">
+            {% if recent_posts %}
+            <div class="space-y-3">
+                {% for post in recent_posts %}
+                <div class="bg-gray-900/40 border border-gray-800 hover:border-gray-700 transition rounded-xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <div>
+                        <p class="text-sm text-gray-200 font-medium line-clamp-1">{{ post.get('content', post.get('text', 'No preview available')) }}</p>
+                        <div class="flex items-center gap-2 mt-2">
+                            <span class="text-[10px] px-2 py-0.5 rounded bg-[#10121a] border border-gray-700 text-gray-400 uppercase font-mono tracking-wider">{{ post.get('platforms', post.get('platform', 'API')) }}</span>
+                            <span class="text-xs text-gray-500 flex items-center gap-1">
+                                <i class="fa-regular fa-clock text-gray-600"></i>
+                                {{ (post.get('scheduled_at')|string)[:16].replace('T', ' ') if post.get('scheduled_at') else 'Just now' }}
+                            </span>
+                        </div>
+                    </div>
+                    <span class="text-[10px] px-2.5 py-1 rounded-full font-bold tracking-wider {% if post.get('status', '')|lower == 'published' %}bg-emerald-500/10 text-emerald-400 border border-emerald-500/20{% else %}bg-amber-500/10 text-amber-400 border border-amber-500/20{% endif %}">
+                        {{ post.get('status', 'PUBLISHED')|upper }}
+                    </span>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+<div class="p-12 rounded-xl border border-dashed border-gray-800 text-center flex flex-col items-center justify-center space-y-3">
                 <div class="w-12 h-12 rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
                     <i class="fa-solid fa-paper-plane"></i>
                 </div>
@@ -98,6 +119,7 @@
                     <i class="fa-solid fa-pen-nib"></i> COMPOSE FIRST POST
                 </a>
             </div>
+        {% endif %}
         </div>
 
         <div class="space-y-3">
